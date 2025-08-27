@@ -1,12 +1,12 @@
 import React from 'react';
 
 import './App.css';
-import ExchangePriceDashboard from './components/ExchangePriceDashboard';
+import LatestExchangePrice from './components/LatestExchangePrice';
 
 function App() {
   return (
     <div className="App">
-      <ExchangePriceDashboard />
+      <LatestExchangePrice />
     </div>
   );
 }

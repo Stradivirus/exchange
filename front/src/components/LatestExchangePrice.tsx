@@ -12,16 +12,24 @@ const LatestExchangePrice: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // 환율 데이터 fetch 함수
+  const loadLatest = () => {
+    setLoading(true);
     fetchLatestExchangePrice()
       .then((data) => {
         setLatest(data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError('데이터를 불러오지 못했습니다.');
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadLatest();
+    const interval = setInterval(loadLatest, 3600000); // 1시간마다 자동 갱신
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) return <div>로딩 중...</div>;
