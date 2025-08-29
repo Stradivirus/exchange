@@ -7,7 +7,6 @@ services:
     container_name: exchange-back
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATA_MONGODB_URI=mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/exchange?retryWrites=true&w=majority&appName=Cluster0
 
     depends_on: []
     restart: unless-stopped
