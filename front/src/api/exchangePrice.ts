@@ -15,3 +15,11 @@ export async function fetchLatestExchangePrice() {
   }
   return null;
 }
+
+// 기간별 환율 데이터 조회
+export async function fetchExchangePricesByPeriod(start: string, end: string): Promise<ExchangePrice[]> {
+  const res = await axios.get('/api/exchange-price/period', {
+    params: { start, end }
+  });
+  return Array.isArray(res.data) ? res.data : [];
+}

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Date;
 
 @Service
 public class ExchangePriceService {
@@ -21,6 +22,11 @@ public class ExchangePriceService {
 
     public List<ExchangePrice> getAllPrices() {
         return repository.findAll();
+    }
+
+    // 기간별 환율 데이터 조회
+    public List<ExchangePrice> getPricesByPeriod(Date start, Date end) {
+        return repository.findByDatetimeBetween(start, end);
     }
 
 }

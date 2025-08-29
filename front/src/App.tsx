@@ -1,14 +1,10 @@
 import React from 'react';
 
 import './App.css';
-import LatestExchangePrice from './components/LatestExchangePrice';
+import ExchangeDashboard from './pages/ExchangeDashboard';
 
 function App() {
-  return (
-    <div className="App">
-      <LatestExchangePrice />
-    </div>
-  );
+  return <ExchangeDashboard />;
 }
 
 export default App;
