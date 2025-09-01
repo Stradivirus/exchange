@@ -1,0 +1,10 @@
+pandas
+numpy
+requests
+beautifulsoup4
+pymongo
+sqlalchemy
+psycopg2-binary
+scikit-learn
+statsmodels
+tensorflow
