@@ -26,11 +26,11 @@ const MainPage: React.FC = () => {
   return (
     <div>
       <h1>오늘의 주요 지표</h1>
+      {data.exchange ? <ExchangeSection data={data.exchange} /> : <div>Exchange 데이터 없음</div>}
+      {data.stock ? <StockSection data={data.stock} /> : <div>Stock 데이터 없음</div>}
       {data.commodities ? <CommoditiesSection data={data.commodities} /> : <div>Commodities 데이터 없음</div>}
       {data.commoditiesIndex ? <CommoditiesIndexSection data={data.commoditiesIndex} /> : <div>Commodities Index 데이터 없음</div>}
-      {data.exchange ? <ExchangeSection data={data.exchange} /> : <div>Exchange 데이터 없음</div>}
       {data.interestRate ? <InterestRateSection data={data.interestRate} /> : <div>Interest Rate 데이터 없음</div>}
-      {data.stock ? <StockSection data={data.stock} /> : <div>Stock 데이터 없음</div>}
     </div>
   );
 };
