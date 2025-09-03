@@ -9,8 +9,8 @@ const InterestRateSection: React.FC<Props> = ({ data }) => (
   <section>
     <h2>Interest Rate</h2>
     <ul>
-      <li>한국 기준금리: {data.korBaseRate?.toFixed(3)}</li>
-      <li>미국 기준금리: {data.usFedRate?.toFixed(3)}</li>
+      <li>한국 기준금리: {data.korBaseRate}</li>
+      <li>미국 기준금리: {data.usFedRate}</li>
     </ul>
   </section>
 );

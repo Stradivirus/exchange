@@ -9,9 +9,9 @@ const CommoditiesIndexSection: React.FC<Props> = ({ data }) => (
   <section>
     <h2>Commodities Index</h2>
     <ul>
-      <li>DXY: {data.dxy?.toFixed(3)}</li>
-      <li>USD Index: {data.usdIndex?.toFixed(3)}</li>
-      <li>VIX: {data.vix?.toFixed(3)}</li>
+      <li>DXY: {data.dxy}</li>
+      <li>USD Index: {data.usdIndex}</li>
+      <li>VIX: {data.vix}</li>
     </ul>
   </section>
 );
