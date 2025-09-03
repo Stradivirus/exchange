@@ -1,10 +1,10 @@
 import React from 'react';
 
 import './App.css';
-import ExchangeDashboard from './pages/ExchangeDashboard';
+import MainPage from './pages/MainPage';
 
 function App() {
-  return <ExchangeDashboard />;
+  return <MainPage />;
 }
 
 export default App;
