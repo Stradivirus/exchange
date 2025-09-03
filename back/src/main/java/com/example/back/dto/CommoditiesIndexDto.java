@@ -10,6 +10,5 @@ import lombok.*;
 public class CommoditiesIndexDto {
     private String date;
     private Double dxy;
-    private Double usdIndex;
     private Double vix;
 }

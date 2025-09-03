@@ -9,7 +9,7 @@ db = client['exchange_all']
 
 # 원자재(현물) 및 인덱스 컬렉션명
 spot_cols = ["gold", "silver", "copper", "crude_oil", "brent_oil"]
-index_cols = ["dxy", "usd_index", "vix"]
+index_cols = ["dxy", "vix"]
 collection_map = {
     "gold": "GOLD",
     "silver": "SILVER",
@@ -17,7 +17,7 @@ collection_map = {
     "crude_oil": "CRUDE_OIL",
     "brent_oil": "BRENT_OIL",
     "dxy": "DXY",
-    "usd_index": "USD_INDEX",
+    # "usd_index": "USD_INDEX",  # 중복 제거
     "vix": "VIX"
 }
 

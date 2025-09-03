@@ -30,12 +30,11 @@ def collect_commodities_and_indices():
         # 원자재
         "GOLD": "GC=F",           # 금 선물
         "CRUDE_OIL": "CL=F",      # 원유 선물 (WTI)
-        "BRENT_OIL": "BZ=F",      # 브렌트유 선물
+        "BRENT_OIL": "BZ=F",     # 브렌트유 선물
         "SILVER": "SI=F",         # 은 선물
         
         # 달러 관련
         "DXY": "DX=F",            # 달러 인덱스
-        "USD_INDEX": "UUP",       # USD 인덱스 ETF
         
         # 기타
         "VIX": "^VIX",            # 변동성 지수

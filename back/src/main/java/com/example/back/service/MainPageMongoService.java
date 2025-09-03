@@ -14,7 +14,6 @@ public class MainPageMongoService {
     private final BrentOilRepository brentOilRepository;
     private final CopperRepository copperRepository;
     private final DxyRepository dxyRepository;
-    private final UsdIndexRepository usdIndexRepository;
     private final VixRepository vixRepository;
     private final UsdRepository usdRepository;
     private final JpyRepository jpyRepository;
@@ -35,7 +34,6 @@ public class MainPageMongoService {
         BrentOil brentOil = brentOilRepository.findTopByOrderByDateDesc();
         Copper copper = copperRepository.findTopByOrderByDateDesc();
         Dxy dxy = dxyRepository.findTopByOrderByDateDesc();
-        UsdIndex usdIndex = usdIndexRepository.findTopByOrderByDateDesc();
         Vix vix = vixRepository.findTopByOrderByDateDesc();
         Usd usd = usdRepository.findTopByOrderByDateDesc();
         Jpy jpy = jpyRepository.findTopByOrderByDateDesc();
@@ -61,7 +59,6 @@ public class MainPageMongoService {
         com.example.back.dto.CommoditiesIndexDto commoditiesIndex = com.example.back.dto.CommoditiesIndexDto.builder()
             .date(dxy != null ? dxy.getDate().toString() : null)
             .dxy(dxy != null ? dxy.getClose() : null)
-            .usdIndex(usdIndex != null ? usdIndex.getClose() : null)
             .vix(vix != null ? vix.getClose() : null)
             .build();
 

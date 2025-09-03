@@ -18,7 +18,7 @@ def get_pg_engine():
     return create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
 
 spot_cols = ["gold", "silver", "copper", "crude_oil", "brent_oil"]
-index_cols = ["dxy", "usd_index", "vix"]
+index_cols = ["dxy", "vix"]
 collection_map = {
     "gold": "GOLD",
     "silver": "SILVER",
@@ -26,7 +26,6 @@ collection_map = {
     "crude_oil": "CRUDE_OIL",
     "brent_oil": "BRENT_OIL",
     "dxy": "DXY",
-    "usd_index": "USD_INDEX",
     "vix": "VIX"
 }
 

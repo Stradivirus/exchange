@@ -11,7 +11,6 @@ export interface CommoditiesDto {
 export interface CommoditiesIndexDto {
   date: string;
   dxy: number;
-  usdIndex: number;
   vix: number;
 }
 export interface ExchangeDto {

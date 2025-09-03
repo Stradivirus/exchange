@@ -11,7 +11,6 @@ CREATE TABLE commodities (
 CREATE TABLE commodities_index(
     date DATE NOT NULL,
     dxy FLOAT,
-    usd_index FLOAT,
     vix FLOAT
 ) PARTITION BY RANGE (date);
 
