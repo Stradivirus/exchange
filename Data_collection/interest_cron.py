@@ -1,5 +1,7 @@
 # /home/exchange/interest_cron.py
 
+import os
+from dotenv import load_dotenv
 import requests
 from fredapi import Fred
 import pandas as pd
@@ -10,12 +12,15 @@ def daily_korea_us_rates_update():
     """한국 + 미국 기준금리 일일 업데이트"""
     print(f"=== 한국 + 미국 기준금리 일일 업데이트 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
     
-    client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    db = client['exchange_all']
-    
-    # API 키 설정
-    bok_api_key = "GYMU5SDZ3BMQ9GWY2JAF"
-    fred_api_key = "be3c10f05ec901151d380553080f640e"
+
+    # 환경변수 로드
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    mongo_uri = os.getenv('MONGODB_URI')
+    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+    bok_api_key = os.getenv('BOK_API_KEY')
+    fred_api_key = os.getenv('FRED_API_KEY')
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
     
     total_new = 0
     

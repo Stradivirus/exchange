@@ -1,4 +1,4 @@
-# /home/exchange/commodities_cron.py
+# /home/exchange/stock_cron.py
 
 import yfinance as yf
 import pandas as pd
@@ -18,18 +18,26 @@ def safe_clean_value(value):
         return float(value)
     return value
 
-def daily_commodities_update():
-    """매일 실행할 원자재/지수 업데이트"""
-    print(f"=== 원자재/지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
+def daily_stock_update():
+    """매일 실행할 주가지수 업데이트"""
+    print(f"=== 주가지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
     
-    client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    db = client['exchange_all']
+    # 환경변수 로드
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    mongo_uri = os.getenv('MONGODB_URI')
+    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
     
-    commodities_and_indices = {
-        "GOLD": "GC=F",           # 금
-        "CRUDE_OIL": "CL=F",      # 원유 (WTI)
-        "DXY": "DX=F",            # 달러 인덱스
-        "VIX": "^VIX",            # 변동성 지수
+    # 전체 주가지수 포함
+    indices = {
+        "KOSPI": "^KS11",      # 코스피
+        "KOSDAQ": "^KQ11",     # 코스닥 ← 추가
+        "DOW_JONES": "^DJI",   # 다우존스 ← 추가
+        "NASDAQ": "^IXIC",     # 나스닥
+        "SP500": "^GSPC"       # S&P 500
     }
     
     # 최근 5일 데이터만 조회
@@ -39,47 +47,40 @@ def daily_commodities_update():
     
     total_new = 0
     
-    for name, ticker in commodities_and_indices.items():
+    for name, ticker in indices.items():
         try:
             print(f"\n--- {name} 최신 데이터 확인 중 ---")
-            
             data = yf.download(ticker, start=start_date, end=end_date, auto_adjust=True, progress=False)
-            
             if not data.empty:
                 df = data.reset_index()
                 collection = db[name]
                 collection.create_index([("date", 1)], unique=True)
-                
                 inserted_count = 0
-                
                 for _, row in df.iterrows():
                     record = {
                         'date': safe_clean_value(row['Date']),
+                        'open': safe_clean_value(row['Open']),
+                        'high': safe_clean_value(row['High']),
+                        'low': safe_clean_value(row['Low']),
                         'close': safe_clean_value(row['Close']),
-                        'price': safe_clean_value(row['Close']),
                         'volume': safe_clean_value(row['Volume']),
                         'created_at': datetime.now()
                     }
-                    
                     result = collection.replace_one(
                         {"date": record['date']},
                         record,
                         upsert=True
                     )
-                    
                     if result.upserted_id:
                         inserted_count += 1
-                
                 total_new += inserted_count
-                
                 if inserted_count > 0:
                     latest_value = safe_clean_value(df.iloc[-1]['Close'])
-                    print(f"{name}: 신규 {inserted_count}개 저장, 최신값: ${latest_value:,.2f}")
+                    print(f"{name}: 신규 {inserted_count}개 저장, 최신값: {latest_value:,.2f}")
                 else:
                     print(f"{name}: 변경사항 없음")
             else:
                 print(f"{name}: 새로운 데이터 없음")
-                
         except Exception as e:
             print(f"{name} 오류: {e}")
     
@@ -87,4 +88,5 @@ def daily_commodities_update():
     client.close()
 
 if __name__ == "__main__":
-    daily_commodities_update()
+    daily_stock_update()
+

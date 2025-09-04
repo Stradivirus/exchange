@@ -2,10 +2,15 @@
 CREATE TABLE commodities (
     date DATE NOT NULL,
     gold FLOAT,
+    gold_volume FLOAT,
     silver FLOAT,
+    silver_volume FLOAT,
     copper FLOAT,
+    copper_volume FLOAT,
     crude_oil FLOAT,
-    brent_oil FLOAT
+    crude_oil_volume FLOAT,
+    brent_oil FLOAT,
+    brent_oil_volume FLOAT
 ) PARTITION BY RANGE (date);
 
 CREATE TABLE commodities_index(
@@ -19,7 +24,7 @@ DO $$
 DECLARE
     y INT;
 BEGIN
-    FOR y IN 2000..2025 LOOP
+    FOR y IN 2010..2025 LOOP
         EXECUTE format(
             'CREATE TABLE IF NOT EXISTS commodities_%s PARTITION OF commodities
              FOR VALUES FROM (''%s-01-01'') TO (''%s-01-01'');',
@@ -32,7 +37,7 @@ DO $$
 DECLARE
     y INT;
 BEGIN
-    FOR y IN 2000..2025 LOOP
+    FOR y IN 2010..2025 LOOP
         EXECUTE format(
             'CREATE TABLE IF NOT EXISTS commodities_index_%s PARTITION OF commodities_index
              FOR VALUES FROM (''%s-01-01'') TO (''%s-01-01'');',

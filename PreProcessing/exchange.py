@@ -1,9 +1,14 @@
+import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from datetime import datetime
 
-# MongoDB 연결 정보 (exchange_all DB)
-client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-db = client['exchange_all']
+# 환경변수 로드
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+mongo_uri = os.getenv('MONGODB_URI')
+mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+client = MongoClient(mongo_uri)
+db = client[mongo_db]
 
 # 통화 코드와 이름 매핑
 currencies = {
@@ -12,8 +17,6 @@ currencies = {
     "0000053": "CNY",  # 위안
     "0000003": "EUR"    # 유로
 }
-
-
 
 import pandas as pd
 import os
@@ -52,22 +55,25 @@ def make_pivot_and_save_csv_and_postgres():
     pivot_df = pivot_df.sort_index()
     print("\n=== 피벗 데이터프레임 샘플 ===")
     print(pivot_df.head())
-    csv_path = "exchange_pivot.csv"
-    pivot_df.to_csv(csv_path, encoding="utf-8-sig")
-    print(f"\nCSV로 저장 완료: {csv_path}")
 
-    # PostgreSQL 저장
-    PG_HOST = os.getenv("PG_HOST", "64.110.115.12")
-    PG_DB = os.getenv("PG_DB", "exchange")
-    PG_USER = os.getenv("PG_USER", "exchange_admin")
-    PG_PASSWORD = os.getenv("PG_PASSWORD", "exchange_password")
+    # PostgreSQL 직접 insert
+    PG_HOST = os.getenv("PG_HOST")
+    PG_DB = os.getenv("PG_DB")
+    PG_USER = os.getenv("PG_USER")
+    PG_PASSWORD = os.getenv("PG_PASSWORD")
     PG_TABLE = os.getenv("PG_TABLE", "exchange")
     engine = create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
-    # 인덱스 초기화 및 저장
     pivot_df_reset = pivot_df.reset_index()
-    # 테이블이 없으면 자동 생성, 있으면 덮어쓰기
-    pivot_df_reset.to_sql(PG_TABLE, engine, if_exists="append", index=False)
-    print(f"\nPostgreSQL({PG_DB}) {PG_TABLE} 테이블에 저장 완료!")
+    expected_cols = ["date", "usd", "jpy", "eur", "cny"]
+    pivot_df_reset = pivot_df_reset[expected_cols]
+    from sqlalchemy import text as sa_text
+    with engine.begin() as conn:
+        for _, row in pivot_df_reset.iterrows():
+            placeholders = ', '.join([f':{col}' for col in expected_cols])
+            columns = ', '.join(expected_cols)
+            sql = f'INSERT INTO public.{PG_TABLE} ({columns}) VALUES ({placeholders})'
+            conn.execute(sa_text(sql), {col: row[col] for col in expected_cols})
+    print(f"\nPostgreSQL({PG_DB}) {PG_TABLE} 테이블에 직접 insert 완료!")
     print(pivot_df_reset.head())
 
 if __name__ == "__main__":

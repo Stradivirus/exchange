@@ -1,5 +1,6 @@
-# /home/exchange/stock_cron.py
-
+# /home/exchange/commodities_cron.py
+import os
+from dotenv import load_dotenv
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
@@ -18,20 +19,28 @@ def safe_clean_value(value):
         return float(value)
     return value
 
-def daily_stock_update():
-    """매일 실행할 주가지수 업데이트"""
-    print(f"=== 주가지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
+def daily_commodities_update():
+    """매일 실행할 원자재/지수 업데이트"""
+    print(f"=== 원자재/지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
+
+    # 환경변수 로드
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    mongo_uri = os.getenv('MONGODB_URI')
+    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
     
-    client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    db = client['exchange_all']
-    
-    # 전체 주가지수 포함
-    indices = {
-        "KOSPI": "^KS11",      # 코스피
-        "KOSDAQ": "^KQ11",     # 코스닥 ← 추가
-        "DOW_JONES": "^DJI",   # 다우존스 ← 추가
-        "NASDAQ": "^IXIC",     # 나스닥
-        "SP500": "^GSPC"       # S&P 500
+    commodities_and_indices = {
+        # 원자재
+        "GOLD": "GC=F",           # 금 선물
+        "CRUDE_OIL": "CL=F",      # 원유 선물 (WTI)
+        "BRENT_OIL": "BZ=F",     # 브렌트유 선물
+        "SILVER": "SI=F",         # 은 선물
+        # 달러 관련
+        "DXY": "DX=F",            # 달러 인덱스
+        # 기타
+        "VIX": "^VIX",            # 변동성 지수
+        "COPPER": "HG=F",         # 구리 선물
     }
     
     # 최근 5일 데이터만 조회
@@ -41,7 +50,7 @@ def daily_stock_update():
     
     total_new = 0
     
-    for name, ticker in indices.items():
+    for name, ticker in commodities_and_indices.items():
         try:
             print(f"\n--- {name} 최신 데이터 확인 중 ---")
             
@@ -57,18 +66,19 @@ def daily_stock_update():
                 for _, row in df.iterrows():
                     record = {
                         'date': safe_clean_value(row['Date']),
+                        'open': safe_clean_value(row['Open']),
+                        'high': safe_clean_value(row['High']),
+                        'low': safe_clean_value(row['Low']),
                         'close': safe_clean_value(row['Close']),
-                        'index_value': safe_clean_value(row['Close']),
                         'volume': safe_clean_value(row['Volume']),
+                        'price': safe_clean_value(row['Close']),  # 호환성
                         'created_at': datetime.now()
                     }
-                    
                     result = collection.replace_one(
                         {"date": record['date']},
                         record,
                         upsert=True
                     )
-                    
                     if result.upserted_id:
                         inserted_count += 1
                 
@@ -76,7 +86,7 @@ def daily_stock_update():
                 
                 if inserted_count > 0:
                     latest_value = safe_clean_value(df.iloc[-1]['Close'])
-                    print(f"{name}: 신규 {inserted_count}개 저장, 최신값: {latest_value:,.2f}")
+                    print(f"{name}: 신규 {inserted_count}개 저장, 최신값: ${latest_value:,.2f}")
                 else:
                     print(f"{name}: 변경사항 없음")
             else:
@@ -89,5 +99,4 @@ def daily_stock_update():
     client.close()
 
 if __name__ == "__main__":
-    daily_stock_update()
-
+    daily_commodities_update()

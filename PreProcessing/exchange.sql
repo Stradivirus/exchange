@@ -12,7 +12,7 @@ DO $$
 DECLARE
     y INT;
 BEGIN
-    FOR y IN 2000..2025 LOOP
+    FOR y IN 2010..2025 LOOP
         EXECUTE format(
             'CREATE TABLE IF NOT EXISTS exchange_%s PARTITION OF exchange
              FOR VALUES FROM (''%s-01-01'') TO (''%s-01-01'');',

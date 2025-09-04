@@ -10,7 +10,7 @@ DO $$
 DECLARE
     y INT;
 BEGIN
-    FOR y IN 2000..2025 LOOP
+    FOR y IN 2010..2025 LOOP
         EXECUTE format(
             'CREATE TABLE IF NOT EXISTS interest_rate_%s PARTITION OF interest_rate
              FOR VALUES FROM (''%s-01-01'') TO (''%s-01-01'');',

@@ -2,17 +2,22 @@ import pandas as pd
 from pymongo import MongoClient
 import os
 from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
 
 def get_mongo():
-    client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    db = client['exchange_all']
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    mongo_uri = os.getenv('MONGODB_URI')
+    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db]
     return client, db
 
 def get_pg_engine():
-    PG_HOST = os.getenv("PG_HOST", "64.110.115.12")
-    PG_DB = os.getenv("PG_DB", "exchange")
-    PG_USER = os.getenv("PG_USER", "exchange_admin")
-    PG_PASSWORD = os.getenv("PG_PASSWORD", "exchange_password")
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    PG_HOST = os.getenv("PG_HOST")
+    PG_DB = os.getenv("PG_DB")
+    PG_USER = os.getenv("PG_USER")
+    PG_PASSWORD = os.getenv("PG_PASSWORD")
     return create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
 
 currencies = ["USD", "JPY", "EUR", "CNY"]
@@ -31,13 +36,18 @@ def upsert_exchange():
             if date is None or d > date:
                 date = d
     if data and date:
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT 1 FROM exchange WHERE date = :date"), {"date": date}).fetchone()
+        from sqlalchemy import text as sa_text
+        expected_cols = ["date", "usd", "jpy", "eur", "cny"]
+        row = {"date": date}
+        for c in currencies:
+            row[c.lower()] = data.get(c.lower())
+        with engine.begin() as conn:
+            result = conn.execute(sa_text("SELECT 1 FROM public.exchange WHERE date = :date"), {"date": date}).fetchone()
             if not result:
-                row = {"date": date}
-                for c in currencies:
-                    row[c.lower()] = data.get(c.lower())
-                pd.DataFrame([row]).to_sql("exchange", engine, if_exists="append", index=False)
+                placeholders = ', '.join([f':{col}' for col in expected_cols])
+                columns = ', '.join(expected_cols)
+                sql = f'INSERT INTO public.exchange ({columns}) VALUES ({placeholders})'
+                conn.execute(sa_text(sql), {col: row.get(col) for col in expected_cols})
                 print(f"Inserted exchange for {date}")
             else:
                 print(f"exchange already exists for {date}")
