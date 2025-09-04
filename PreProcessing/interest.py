@@ -52,11 +52,11 @@ def make_and_save_interest_rate():
     PG_PASSWORD = os.getenv("PG_PASSWORD")
     engine = create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
     df_reset = pivot_df.reset_index()
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         for _, row in df_reset.iterrows():
             date = row['date']
-            kor_base_rate = row['kor_base_rate'] if not pd.isna(row['kor_base_rate']) else None
-            us_fed_rate = row['us_fed_rate'] if not pd.isna(row['us_fed_rate']) else None
+            kor_base_rate = row['kor_base_rate'] if row['kor_base_rate'] is not None else None
+            us_fed_rate = row['us_fed_rate'] if row['us_fed_rate'] is not None else None
             exists = conn.execute(text("SELECT 1 FROM interest_rate WHERE date = :date"), {"date": date}).fetchone()
             if not exists:
                 conn.execute(
