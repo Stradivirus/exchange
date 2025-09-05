@@ -25,6 +25,5 @@ public class Sp500 {
     public Double getLow() { return low; }
     public Double getVolume() { return volume; }
     public Double getIndex_value() { return index_value; }
-    public Double getPrice() { return index_value; }
     public Date getCreated_at() { return created_at; }
 }

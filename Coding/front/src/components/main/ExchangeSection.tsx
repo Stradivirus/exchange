@@ -20,7 +20,7 @@ const ExchangeSection: React.FC<Props> = ({ data }) => {
           <strong>{name}:</strong>
           <ul>
             <li>rate: {item.rate}</li>
-            <li>unit_name: {item.unit_name}</li>
+            <li>단위 : {item.unit_name}</li>
             <li>date: {formatDate(item.date)}</li>
           </ul>
         </li>

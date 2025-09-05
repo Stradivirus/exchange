@@ -45,7 +45,6 @@ export interface StockDto {
   high: number;
   low: number;
   volume: number;
-  price: number;
   created_at: string;
 }
 

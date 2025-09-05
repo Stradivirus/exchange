@@ -28,7 +28,6 @@ const StockSection: React.FC<Props> = ({ data }) => {
             <li>high: {formatNum(sp500.high)}</li>
             <li>low: {formatNum(sp500.low)}</li>
             <li>volume: {sp500.volume}</li>
-            <li>price: {formatNum(sp500.price)}</li>
             <li>date: {formatDate(sp500.date)}</li>
           </ul>
         </li>
@@ -42,7 +41,6 @@ const StockSection: React.FC<Props> = ({ data }) => {
             <li>high: {formatNum(dow.high)}</li>
             <li>low: {formatNum(dow.low)}</li>
             <li>volume: {dow.volume}</li>
-            <li>price: {formatNum(dow.price)}</li>
             <li>date: {formatDate(dow.date)}</li>
           </ul>
         </li>
@@ -56,7 +54,6 @@ const StockSection: React.FC<Props> = ({ data }) => {
             <li>high: {formatNum(nasdaq.high)}</li>
             <li>low: {formatNum(nasdaq.low)}</li>
             <li>volume: {nasdaq.volume}</li>
-            <li>price: {formatNum(nasdaq.price)}</li>
             <li>date: {formatDate(nasdaq.date)}</li>
           </ul>
         </li>
@@ -70,7 +67,6 @@ const StockSection: React.FC<Props> = ({ data }) => {
             <li>high: {formatNum(kospi.high)}</li>
             <li>low: {formatNum(kospi.low)}</li>
             <li>volume: {kospi.volume}</li>
-            <li>price: {formatNum(kospi.price)}</li>
             <li>date: {formatDate(kospi.date)}</li>
           </ul>
         </li>
@@ -84,7 +80,6 @@ const StockSection: React.FC<Props> = ({ data }) => {
             <li>high: {formatNum(kosdaq.high)}</li>
             <li>low: {formatNum(kosdaq.low)}</li>
             <li>volume: {kosdaq.volume}</li>
-            <li>price: {formatNum(kosdaq.price)}</li>
             <li>date: {formatDate(kosdaq.date)}</li>
           </ul>
         </li>
