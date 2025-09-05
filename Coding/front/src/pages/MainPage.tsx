@@ -29,13 +29,13 @@ const MainPage: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7f7', minHeight: '100vh', padding: '32px 0' }}>
       <h1 style={{ marginBottom: 32 }}>최신 주요 지표</h1>
-      <SectionContainer title="Exchange">
+      <SectionContainer>
         <ExchangeSection data={[...(data.usdList || []), ...(data.jpyList || []), ...(data.eurList || []), ...(data.cnyList || [])]} />
       </SectionContainer>
-      <SectionContainer title="Stock">
+      <SectionContainer>
         <StockSection data={[...(data.sp500List || []), ...(data.dowJonesList || []), ...(data.nasdaqList || []), ...(data.kospiList || []), ...(data.kosdaqList || [])]} />
       </SectionContainer>
-      <SectionContainer title="Grains">
+      <SectionContainer>
         <GrainsSection
           rice={data.riceList}
           wheat={data.wheatList}
@@ -44,7 +44,7 @@ const MainPage: React.FC = () => {
           sugar={data.sugarList}
         />
       </SectionContainer>
-      <SectionContainer title="Commodities">
+      <SectionContainer>
         <CommoditiesSection
           data={{
             goldList: data.goldList,
@@ -55,10 +55,10 @@ const MainPage: React.FC = () => {
           }}
         />
       </SectionContainer>
-      <SectionContainer title="Commodities Index">
+      <SectionContainer>
         <CommoditiesIndexSection data={[...(data.dxyList || []), ...(data.vixList || [])]} />
       </SectionContainer>
-      <SectionContainer title="Interest Rate">
+      <SectionContainer>
         <InterestRateSection data={[...(data.korBaseRateList || []), ...(data.usFedRateList || [])]} />
       </SectionContainer>
     </div>

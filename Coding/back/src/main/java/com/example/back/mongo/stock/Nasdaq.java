@@ -14,8 +14,6 @@ public class Nasdaq {
     private Double high;
     private Double low;
     private Double volume;
-    private Double index_value;
-    private Date created_at;
 
     public String getId() { return id; }
     public Date getDate() { return date; }
@@ -24,6 +22,4 @@ public class Nasdaq {
     public Double getHigh() { return high; }
     public Double getLow() { return low; }
     public Double getVolume() { return volume; }
-    public Double getIndex_value() { return index_value; }
-    public Date getCreated_at() { return created_at; }
 }

@@ -12,12 +12,10 @@ public class Cny {
     private Double rate;
     private String currency_code;
     private String unit_name;
-    private Date created_at;
 
     public String getId() { return id; }
     public Date getDate() { return date; }
     public Double getRate() { return rate; }
     public String getCurrency_code() { return currency_code; }
     public String getUnit_name() { return unit_name; }
-    public Date getCreated_at() { return created_at; }
 }

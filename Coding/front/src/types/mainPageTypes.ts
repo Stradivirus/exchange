@@ -10,7 +10,6 @@ export interface GoldDto {
   low: number;
   volume: number;
   price: number;
-  created_at: string;
 }
 
 export interface CommoditiesIndexDto {
@@ -19,23 +18,17 @@ export interface CommoditiesIndexDto {
   open: number;
   high: number;
   low: number;
-  volume: number;
-  price: number;
-  created_at: string;
 }
 
 export interface ExchangeDto {
   date: string;
   rate: number;
-  currency_code: string;
   unit_name: string;
-  created_at: string;
 }
 
 export interface InterestRateDto {
   date: string;
   rate: number;
-  created_at: string;
 }
 
 export interface StockDto {
@@ -45,7 +38,6 @@ export interface StockDto {
   high: number;
   low: number;
   volume: number;
-  created_at: string;
 }
 
 export interface MainPageResponseDto {

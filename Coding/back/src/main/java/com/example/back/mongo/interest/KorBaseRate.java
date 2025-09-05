@@ -13,7 +13,6 @@ public class KorBaseRate {
     private String type;
     private String country;
     private String source;
-    private Date created_at;
 
     public String getId() { return id; }
     public Date getDate() { return date; }
@@ -21,5 +20,4 @@ public class KorBaseRate {
     public String getType() { return type; }
     public String getCountry() { return country; }
     public String getSource() { return source; }
-    public Date getCreated_at() { return created_at; }
 }

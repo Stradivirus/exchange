@@ -1,6 +1,11 @@
 import React from 'react';
 
-const SectionContainer: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => (
+interface SectionContainerProps {
+  children: React.ReactNode;
+  title?: string; // 이렇게 ?를 추가
+}
+
+const SectionContainer: React.FC<SectionContainerProps> = ({ children, title }) => (
   <section style={{
     background: '#fff',
     borderRadius: '12px',
@@ -10,7 +15,7 @@ const SectionContainer: React.FC<{ children: React.ReactNode; title: string }> =
     maxWidth: 700,
     width: '100%',
   }}>
-    <h2 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 16 }}>{title}</h2>
+    {title && <h2 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 16 }}>{title}</h2>}
     {children}
   </section>
 );
