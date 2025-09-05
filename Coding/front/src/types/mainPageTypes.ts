@@ -1,42 +1,82 @@
 // src/types/mainPageTypes.ts
 
-export interface CommoditiesDto {
+
+// 상세 DTO 예시 (실제 백엔드 구조에 맞게 확장 가능)
+export interface GoldDto {
   date: string;
-  gold: number;
-  silver: number;
-  copper: number;
-  crudeOil: number;
-  brentOil: number;
+  close: number;
+  open: number;
+  high: number;
+  low: number;
+  volume: number;
+  price: number;
+  created_at: string;
 }
+
 export interface CommoditiesIndexDto {
   date: string;
-  dxy: number;
-  vix: number;
+  close: number;
+  open: number;
+  high: number;
+  low: number;
+  volume: number;
+  price: number;
+  created_at: string;
 }
+
 export interface ExchangeDto {
   date: string;
-  usd: number;
-  jpy: number;
-  eur: number;
-  cny: number;
+  rate: number;
+  currency_code: string;
+  unit_name: string;
+  created_at: string;
 }
+
 export interface InterestRateDto {
   date: string;
-  korBaseRate: number;
-  usFedRate: number;
+  rate: number;
+  created_at: string;
 }
+
 export interface StockDto {
   date: string;
-  sp500: number;
-  dowJones: number;
-  nasdaq: number;
-  kospi: number;
-  kosdaq: number;
+  close: number;
+  open: number;
+  high: number;
+  low: number;
+  volume: number;
+  price: number;
+  created_at: string;
 }
+
 export interface MainPageResponseDto {
-  commodities: CommoditiesDto | null;
-  commoditiesIndex: CommoditiesIndexDto | null;
-  exchange: ExchangeDto | null;
-  interestRate: InterestRateDto | null;
-  stock: StockDto | null;
+  // grains
+  riceList: any[];
+  wheatList: any[];
+  cornList: any[];
+  coffeeList: any[];
+  sugarList: any[];
+  // commodities
+  goldList: GoldDto[];
+  silverList: any[];
+  copperList: any[];
+  crudeOilList: any[];
+  brentOilList: any[];
+  // commodities index
+  dxyList: CommoditiesIndexDto[];
+  vixList: CommoditiesIndexDto[];
+  // exchange
+  usdList: ExchangeDto[];
+  jpyList: ExchangeDto[];
+  eurList: ExchangeDto[];
+  cnyList: ExchangeDto[];
+  // interest
+  korBaseRateList: InterestRateDto[];
+  usFedRateList: InterestRateDto[];
+  // stock
+  sp500List: StockDto[];
+  dowJonesList: StockDto[];
+  nasdaqList: StockDto[];
+  kospiList: StockDto[];
+  kosdaqList: StockDto[];
 }

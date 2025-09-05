@@ -1,27 +1,24 @@
 import React from 'react';
-
-
-// import { GoldDto } from '../../types/mainPageTypes';
+// grains DTO 타입 import 필요 (RiceDto 등)
 
 interface Props {
-  data: {
-    goldList: any[];
-    silverList: any[];
-    copperList: any[];
-    crudeOilList: any[];
-    brentOilList: any[];
-  };
+  rice: any[];
+  wheat: any[];
+  corn: any[];
+  coffee: any[];
+  sugar: any[];
 }
+
 
 
 const formatNum = (n: any) => (typeof n === 'number' ? n.toFixed(2) : n);
 const formatDate = (dateStr: string) => dateStr ? dateStr.slice(0, 10) : '';
 
-const renderCommodity = (name: string, items: any[]) => (
-  <li>
+const renderGrain = (name: string, items: any[]) => (
+  <li style={{ marginBottom: 16 }}>
     <strong>{name}:</strong>
     {items.length === 0 ? ' -' : (
-      <ul>
+      <ul style={{ marginLeft: 12 }}>
         <li>close: {formatNum(items[0].close)}</li>
         <li>open: {formatNum(items[0].open)}</li>
         <li>high: {formatNum(items[0].high)}</li>
@@ -34,14 +31,16 @@ const renderCommodity = (name: string, items: any[]) => (
   </li>
 );
 
-const CommoditiesSection: React.FC<Props> = ({ data }) => (
+const GrainsSection: React.FC<Props> = ({ rice, wheat, corn, coffee, sugar }) => (
+  <section>
   <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
-    {renderCommodity('Gold', data.goldList)}
-    {renderCommodity('Silver', data.silverList)}
-    {renderCommodity('Copper', data.copperList)}
-    {renderCommodity('Crude Oil', data.crudeOilList)}
-    {renderCommodity('Brent Oil', data.brentOilList)}
-  </ul>
+      {renderGrain('Rice', rice)}
+      {renderGrain('Wheat', wheat)}
+      {renderGrain('Corn', corn)}
+      {renderGrain('Coffee', coffee)}
+      {renderGrain('Sugar', sugar)}
+    </ul>
+  </section>
 );
 
-export default CommoditiesSection;
+export default GrainsSection;

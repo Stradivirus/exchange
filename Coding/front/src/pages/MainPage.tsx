@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { MainPageResponseDto } from '../types/mainPageTypes';
 import { fetchTodayInfo } from '../api/mainPageApi';
+
 import CommoditiesSection from '../components/main/CommoditiesSection';
 import CommoditiesIndexSection from '../components/main/CommoditiesIndexSection';
 import ExchangeSection from '../components/main/ExchangeSection';
 import InterestRateSection from '../components/main/InterestRateSection';
 import StockSection from '../components/main/StockSection';
+import GrainsSection from '../components/main/GrainsSection';
+import SectionContainer from '../components/main/SectionContainer';
 
 const MainPage: React.FC = () => {
   const [data, setData] = useState<MainPageResponseDto | null>(null);
@@ -24,13 +27,40 @@ const MainPage: React.FC = () => {
   if (!data) return <div>데이터 없음</div>;
 
   return (
-    <div>
-      <h1>최신 주요 지표</h1>
-      {data.exchange ? <ExchangeSection data={data.exchange} /> : <div>Exchange 데이터 없음</div>}
-      {data.stock ? <StockSection data={data.stock} /> : <div>Stock 데이터 없음</div>}
-      {data.commodities ? <CommoditiesSection data={data.commodities} /> : <div>Commodities 데이터 없음</div>}
-      {data.commoditiesIndex ? <CommoditiesIndexSection data={data.commoditiesIndex} /> : <div>Commodities Index 데이터 없음</div>}
-      {data.interestRate ? <InterestRateSection data={data.interestRate} /> : <div>Interest Rate 데이터 없음</div>}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#f7f7f7', minHeight: '100vh', padding: '32px 0' }}>
+      <h1 style={{ marginBottom: 32 }}>최신 주요 지표</h1>
+      <SectionContainer title="Exchange">
+        <ExchangeSection data={[...(data.usdList || []), ...(data.jpyList || []), ...(data.eurList || []), ...(data.cnyList || [])]} />
+      </SectionContainer>
+      <SectionContainer title="Stock">
+        <StockSection data={[...(data.sp500List || []), ...(data.dowJonesList || []), ...(data.nasdaqList || []), ...(data.kospiList || []), ...(data.kosdaqList || [])]} />
+      </SectionContainer>
+      <SectionContainer title="Grains">
+        <GrainsSection
+          rice={data.riceList}
+          wheat={data.wheatList}
+          corn={data.cornList}
+          coffee={data.coffeeList}
+          sugar={data.sugarList}
+        />
+      </SectionContainer>
+      <SectionContainer title="Commodities">
+        <CommoditiesSection
+          data={{
+            goldList: data.goldList,
+            silverList: data.silverList,
+            copperList: data.copperList,
+            crudeOilList: data.crudeOilList,
+            brentOilList: data.brentOilList,
+          }}
+        />
+      </SectionContainer>
+      <SectionContainer title="Commodities Index">
+        <CommoditiesIndexSection data={[...(data.dxyList || []), ...(data.vixList || [])]} />
+      </SectionContainer>
+      <SectionContainer title="Interest Rate">
+        <InterestRateSection data={[...(data.korBaseRateList || []), ...(data.usFedRateList || [])]} />
+      </SectionContainer>
     </div>
   );
 };
