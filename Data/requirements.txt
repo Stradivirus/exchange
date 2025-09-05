@@ -1,0 +1,8 @@
+yfinance
+pandas
+pymongo
+numpy
+requests
+fredapi
+sqlalchemy
+psycopg2-binary
