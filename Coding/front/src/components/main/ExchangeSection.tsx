@@ -47,12 +47,12 @@ const ExchangeSection: React.FC<Props> = ({ data }) => {
       }}>
         <span style={{ fontWeight: 700, fontSize: '1.5rem' }}>Exchange</span>
         <span style={{ fontWeight: 500 }}>
-          {formattedDate}
           {unitNames && (
             <span style={{ marginLeft: 8, fontWeight: 400, fontSize: '1rem', color: '#888' }}>
               단위 : {unitNames}
             </span>
           )}
+          <span style={{ marginLeft: '2em' }}>{formattedDate}</span>
         </span>
       </div>
       <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
