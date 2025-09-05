@@ -1,6 +1,4 @@
 # /home/exchange/commodities_cron.py
-import os
-from dotenv import load_dotenv
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
@@ -23,10 +21,9 @@ def daily_commodities_update():
     """매일 실행할 원자재/지수 업데이트"""
     print(f"=== 원자재/지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
 
-    # 환경변수 로드
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    mongo_uri = os.getenv('MONGODB_URI')
-    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+    # 하드코딩 환경설정 (exchange_all.py와 동일하게 Atlas 주소 사용)
+    mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    mongo_db = "exchange_all"
     client = MongoClient(mongo_uri)
     db = client[mongo_db]
     
@@ -36,11 +33,24 @@ def daily_commodities_update():
         "CRUDE_OIL": "CL=F",      # 원유 선물 (WTI)
         "BRENT_OIL": "BZ=F",     # 브렌트유 선물
         "SILVER": "SI=F",         # 은 선물
-        # 달러 관련
-        "DXY": "DX=F",            # 달러 인덱스
-        # 기타
-        "VIX": "^VIX",            # 변동성 지수
         "COPPER": "HG=F",         # 구리 선물
+
+        # 곡물
+        "CORN": "ZC=F",           # 옥수수 선물
+        "WHEAT": "ZW=F",          # 밀 선물
+        "RICE": "ZR=F",           # 쌀 선물 (Rough Rice)
+
+        # 커피
+        "COFFEE": "KC=F",         # 커피 선물
+
+        # 설탕
+        "SUGAR": "SB=F",          # 설탕 선물
+
+        # 달러 인덱스
+        "DXY": "DX=F",            # 달러 인덱스
+
+        # 변동성 지수
+        "VIX": "^VIX",            # 변동성 지수
     }
     
     # 최근 5일 데이터만 조회

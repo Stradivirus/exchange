@@ -1,23 +1,20 @@
-import pandas as pd
 from pymongo import MongoClient
-import os
 from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
+
+# 하드코딩 환경설정
+MONGO_URI = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_DB = "exchange_all"
+PG_HOST = "64.110.115.12"
+PG_DB = "exchange"
+PG_USER = "exchange_admin"
+PG_PASSWORD = "exchange_password"
 
 def get_mongo():
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    mongo_uri = os.getenv('MONGODB_URI')
-    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
-    client = MongoClient(mongo_uri)
-    db = client[mongo_db]
+    client = MongoClient(MONGO_URI)
+    db = client[MONGO_DB]
     return client, db
 
 def get_pg_engine():
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    PG_HOST = os.getenv("PG_HOST")
-    PG_DB = os.getenv("PG_DB")
-    PG_USER = os.getenv("PG_USER")
-    PG_PASSWORD = os.getenv("PG_PASSWORD")
     return create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
 
 def upsert_interest():

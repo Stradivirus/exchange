@@ -1,6 +1,4 @@
 # /home/exchange/interest_full.py
-import os
-from dotenv import load_dotenv
 import requests
 from fredapi import Fred
 import pandas as pd
@@ -12,12 +10,11 @@ def collect_korea_us_rates_full():
     """한국 + 미국 기준금리 전체 데이터 수집"""
     print("=== 한국 + 미국 기준금리 전체 데이터 수집 시작 ===")
     
-    # 환경변수 로드
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    mongo_uri = os.getenv('MONGODB_URI')
-    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
-    bok_api_key = os.getenv('BOK_API_KEY')
-    fred_api_key = os.getenv('FRED_API_KEY')
+    # 하드코딩 환경설정
+    mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    mongo_db = "exchange_all"
+    bok_api_key = "GYMU5SDZ3BMQ9GWY2JAF"
+    fred_api_key = "be3c10f05ec901151d380553080f640e"
     client = MongoClient(mongo_uri)
     db = client[mongo_db]
     

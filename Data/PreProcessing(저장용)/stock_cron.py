@@ -1,23 +1,20 @@
-import pandas as pd
 from pymongo import MongoClient
-import os
-from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
+from sqlalchemy import create_engine
+
+# 하드코딩 환경설정
+MONGO_URI = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_DB = "exchange_all"
+PG_HOST = "64.110.115.12"
+PG_DB = "exchange"
+PG_USER = "exchange_admin"
+PG_PASSWORD = "exchange_password"
 
 def get_mongo():
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    mongo_uri = os.getenv('MONGODB_URI')
-    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
-    client = MongoClient(mongo_uri)
-    db = client[mongo_db]
+    client = MongoClient(MONGO_URI)
+    db = client[MONGO_DB]
     return client, db
 
 def get_pg_engine():
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    PG_HOST = os.getenv("PG_HOST")
-    PG_DB = os.getenv("PG_DB")
-    PG_USER = os.getenv("PG_USER")
-    PG_PASSWORD = os.getenv("PG_PASSWORD")
     return create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
 
 stock_indices = ["SP500", "DOW_JONES", "NASDAQ", "KOSPI", "KOSDAQ"]
@@ -32,8 +29,10 @@ def upsert_stock():
         doc = db[idx].find_one(sort=[("date", -1)])
         if doc:
             d = doc["date"].date() if hasattr(doc["date"], 'date') else doc["date"]
-            data[idx.lower()] = doc.get("close")
-            volume_data[f"{idx.lower()}_volume"] = doc.get("volume")
+            close_val = doc.get("close")
+            volume_val = doc.get("volume")
+            data[idx.lower()] = round(close_val, 4) if close_val is not None else None
+            volume_data[f"{idx.lower()}_volume"] = round(volume_val, 4) if volume_val is not None else None
             if date is None or d > date:
                 date = d
     if data and date:

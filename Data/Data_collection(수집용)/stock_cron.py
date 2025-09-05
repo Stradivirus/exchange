@@ -22,12 +22,9 @@ def daily_stock_update():
     """매일 실행할 주가지수 업데이트"""
     print(f"=== 주가지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
     
-    # 환경변수 로드
-    import os
-    from dotenv import load_dotenv
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    mongo_uri = os.getenv('MONGODB_URI')
-    mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+    # 하드코딩 환경설정
+    mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    mongo_db = "exchange_all"
     client = MongoClient(mongo_uri)
     db = client[mongo_db]
     
@@ -56,6 +53,7 @@ def daily_stock_update():
                 collection = db[name]
                 collection.create_index([("date", 1)], unique=True)
                 inserted_count = 0
+                updated_count = 0
                 for _, row in df.iterrows():
                     record = {
                         'date': safe_clean_value(row['Date']),
@@ -66,17 +64,20 @@ def daily_stock_update():
                         'volume': safe_clean_value(row['Volume']),
                         'created_at': datetime.now()
                     }
-                    result = collection.replace_one(
-                        {"date": record['date']},
-                        record,
-                        upsert=True
-                    )
-                    if result.upserted_id:
+                    query = {"date": record['date']}
+                    existing = collection.find_one(query)
+                    if not existing:
+                        collection.insert_one(record)
                         inserted_count += 1
-                total_new += inserted_count
-                if inserted_count > 0:
+                    else:
+                        # 주요 값이 바뀐 경우에만 update
+                        if any(record[k] != existing.get(k) for k in ['open','high','low','close','volume']):
+                            collection.replace_one(query, record, upsert=True)
+                            updated_count += 1
+                total_new += inserted_count + updated_count
+                if inserted_count > 0 or updated_count > 0:
                     latest_value = safe_clean_value(df.iloc[-1]['Close'])
-                    print(f"{name}: 신규 {inserted_count}개 저장, 최신값: {latest_value:,.2f}")
+                    print(f"{name}: 신규 {inserted_count}개, 업데이트 {updated_count}개 저장, 최신값: {latest_value:,.2f}")
                 else:
                     print(f"{name}: 변경사항 없음")
             else:

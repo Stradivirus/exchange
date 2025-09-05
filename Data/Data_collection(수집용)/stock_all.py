@@ -6,12 +6,9 @@ from pymongo import MongoClient
 import numpy as np
 
 
-# 환경변수 로드
-import os
-from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-mongo_uri = os.getenv('MONGODB_URI')
-mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+# 하드코딩 환경설정
+mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+mongo_db = "exchange_all"
 client = MongoClient(mongo_uri)
 db = client[mongo_db]
 

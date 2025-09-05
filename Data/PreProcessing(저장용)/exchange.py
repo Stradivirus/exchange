@@ -1,12 +1,10 @@
 import os
-from dotenv import load_dotenv
 from pymongo import MongoClient
 from datetime import datetime
 
 # 환경변수 로드
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-mongo_uri = os.getenv('MONGODB_URI')
-mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+mongo_db = "exchange_all"
 client = MongoClient(mongo_uri)
 db = client[mongo_db]
 
@@ -57,10 +55,10 @@ def make_pivot_and_save_csv_and_postgres():
     print(pivot_df.head())
 
     # PostgreSQL 직접 insert
-    PG_HOST = os.getenv("PG_HOST")
-    PG_DB = os.getenv("PG_DB")
-    PG_USER = os.getenv("PG_USER")
-    PG_PASSWORD = os.getenv("PG_PASSWORD")
+    PG_HOST = "64.110.115.12"
+    PG_DB = "exchange"
+    PG_USER = "exchange_admin"
+    PG_PASSWORD = "exchange_password"
     PG_TABLE = os.getenv("PG_TABLE", "exchange")
     engine = create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
     pivot_df_reset = pivot_df.reset_index()

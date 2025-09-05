@@ -1,15 +1,17 @@
 import pandas as pd
 from pymongo import MongoClient
-import os
 from sqlalchemy import create_engine
 
-# 환경변수 로드
-from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-mongo_uri = os.getenv('MONGODB_URI')
-mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+# 하드코딩 환경설정
+mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+mongo_db = "exchange_all"
 client = MongoClient(mongo_uri)
 db = client[mongo_db]
+
+PG_HOST = "64.110.115.12"
+PG_DB = "exchange"
+PG_USER = "exchange_admin"
+PG_PASSWORD = "exchange_password"
 
 def make_and_save_interest_rate():
     """MongoDB에서 금리 데이터를 읽어와 피벗, 반올림, CSV/DB 저장 (하나라도 값이 있는 날짜만)"""
@@ -46,10 +48,6 @@ def make_and_save_interest_rate():
 
     # PostgreSQL 저장 (insert 방식, 중복 날짜는 insert하지 않음)
     from sqlalchemy import text
-    PG_HOST = os.getenv("PG_HOST")
-    PG_DB = os.getenv("PG_DB")
-    PG_USER = os.getenv("PG_USER")
-    PG_PASSWORD = os.getenv("PG_PASSWORD")
     engine = create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
     df_reset = pivot_df.reset_index()
     with engine.begin() as conn:

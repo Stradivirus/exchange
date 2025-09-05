@@ -1,18 +1,21 @@
 import pandas as pd
 from pymongo import MongoClient
-import os
 from sqlalchemy import create_engine
 
-# 환경변수 로드
-from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-mongo_uri = os.getenv('MONGODB_URI')
-mongo_db = os.getenv('MONGODB_DB', 'exchange_all')
+# 하드코딩 환경설정
+mongo_uri = "mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+mongo_db = "exchange_all"
 client = MongoClient(mongo_uri)
 db = client[mongo_db]
 
-# 원자재(현물) 및 인덱스 컬렉션명
+PG_HOST = "64.110.115.12"
+PG_DB = "exchange"
+PG_USER = "exchange_admin"
+PG_PASSWORD = "exchange_password"
+
+# 원자재(현물), 곡물, 인덱스 컬렉션명
 spot_cols = ["gold", "silver", "copper", "crude_oil", "brent_oil"]
+grains_cols = ["corn", "wheat", "rice", "coffee", "sugar"]
 index_cols = ["dxy", "vix"]
 collection_map = {
     "gold": "GOLD",
@@ -20,6 +23,11 @@ collection_map = {
     "copper": "COPPER",
     "crude_oil": "CRUDE_OIL",
     "brent_oil": "BRENT_OIL",
+    "corn": "CORN",
+    "wheat": "WHEAT",
+    "rice": "RICE",
+    "coffee": "COFFEE",
+    "sugar": "SUGAR",
     "dxy": "DXY",
     "vix": "VIX"
 }
@@ -27,7 +35,7 @@ collection_map = {
 def make_and_save_commodities():
     """MongoDB에서 원자재/지수 데이터를 읽어와 피벗, 반올림, CSV/DB 저장"""
     all_data = []
-    for col in spot_cols + index_cols:
+    for col in spot_cols + grains_cols + index_cols:
         collection = db[collection_map[col]]
         for doc in collection.find({}, {"date": 1, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1, "_id": 0}):
             avg_price = None
@@ -39,7 +47,7 @@ def make_and_save_commodities():
                 "date": doc["date"].date() if hasattr(doc["date"], 'date') else doc["date"],
                 "item": col
             }
-            if col in spot_cols:
+            if col in spot_cols or col in grains_cols:
                 row[col] = avg_price
                 row[f"{col}_volume"] = doc.get("volume")
             else:
@@ -49,6 +57,7 @@ def make_and_save_commodities():
     if df.empty:
         print("MongoDB에서 불러온 데이터가 없습니다.")
         return
+
 
     # 현물(commodities) 피벗
     spot_value_cols = []
@@ -61,6 +70,17 @@ def make_and_save_commodities():
     print("\n=== 현물(commodities) 평균가+거래량 피벗 샘플 ===")
     print(spot_pivot.tail())
 
+    # 곡물(grains) 피벗
+    grains_value_cols = []
+    for col in grains_cols:
+        grains_value_cols.append(col)
+        grains_value_cols.append(f"{col}_volume")
+    grains_pivot = df[df["item"].isin(grains_cols)].pivot_table(index="date", values=grains_value_cols, aggfunc="first")
+    grains_pivot = grains_pivot.reindex(columns=grains_value_cols)
+    grains_pivot = grains_pivot.sort_index().round(4)
+    print("\n=== 곡물(grains) 평균가+거래량 피벗 샘플 ===")
+    print(grains_pivot.tail())
+
     # 인덱스(commodities_index) 피벗
     index_pivot = df[df["item"].isin(index_cols)].pivot_table(index="date", values=index_cols, aggfunc="first")
     index_pivot = index_pivot.reindex(columns=index_cols)
@@ -69,11 +89,8 @@ def make_and_save_commodities():
     print(index_pivot.tail())
 
     # PostgreSQL 저장
-    PG_HOST = os.getenv("PG_HOST")
-    PG_DB = os.getenv("PG_DB")
-    PG_USER = os.getenv("PG_USER")
-    PG_PASSWORD = os.getenv("PG_PASSWORD")
     engine = create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:5432/{PG_DB}")
+
 
     # 현물 테이블 직접 insert (to_sql 대신)
     spot_pivot_reset = spot_pivot.reset_index()
@@ -94,6 +111,25 @@ def make_and_save_commodities():
             sql = f'INSERT INTO public.commodities ({columns}) VALUES ({placeholders})'
             conn.execute(text(sql), {col: row[col] for col in expected_cols})
     print("\nPostgreSQL(commodities) 테이블에 저장 완료!")
+
+    # 곡물(grains) 테이블 직접 insert
+    grains_pivot_reset = grains_pivot.reset_index()
+    grains_expected_cols = [
+        'date',
+        'corn', 'corn_volume',
+        'wheat', 'wheat_volume',
+        'rice', 'rice_volume',
+        'coffee', 'coffee_volume',
+        'sugar', 'sugar_volume'
+    ]
+    grains_pivot_reset = grains_pivot_reset[grains_expected_cols]
+    with engine.begin() as conn:
+        for _, row in grains_pivot_reset.iterrows():
+            placeholders = ', '.join([f':{col}' for col in grains_expected_cols])
+            columns = ', '.join(grains_expected_cols)
+            sql = f'INSERT INTO public.grains ({columns}) VALUES ({placeholders})'
+            conn.execute(text(sql), {col: row[col] for col in grains_expected_cols})
+    print("PostgreSQL(grains) 테이블에 저장 완료!")
 
     # 인덱스 테이블 저장
     index_pivot_reset = index_pivot.reset_index()

@@ -12,6 +12,7 @@ engine = create_engine(f"postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@{PG_HOST}
 main_tables = [
     'commodities',
     'commodities_index',
+    'grains',
     'exchange',
     'interest_rate',
     'stock'
