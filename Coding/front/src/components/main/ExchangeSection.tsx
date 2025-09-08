@@ -23,6 +23,9 @@ const ExchangeSection: React.FC<Props> = ({ data }) => {
     item ? (
       <li>
         <strong>{name}:</strong>
+        {name === 'JPY' && (
+          <span style={{ marginLeft: 6, color: '#888', fontSize: '0.95em' }}>(100엔 단위)</span>
+        )}
         <ul>
           <li>rate: {item.rate}</li>
         </ul>
