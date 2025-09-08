@@ -13,6 +13,5 @@ public class KospiDto {
     private Double high;
     private Double low;
     private Double volume;
-    private Double price;
     private Date created_at;
 }
