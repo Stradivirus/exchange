@@ -9,7 +9,6 @@ public class EconomicSentimentDto {
     private String itemName;
     private String unitName;
     private Double value;
-    private Date createdAt;
 
     public Date getDate() { return date; }
     public void setDate(Date date) { this.date = date; }

@@ -9,7 +9,6 @@ public class ConsumerSentimentDto {
     private String itemName;
     private String unitName;
     private Double value;
-    private Date createdAt;
     private String regionCode;
     private String regionName;
 
