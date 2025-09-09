@@ -2,19 +2,21 @@
 import React, { useEffect, useState } from 'react';
 import { MainPageResponseDto } from '../types/mainPageTypes';
 import { fetchTodayInfo, fetchLatestExchangeFromPostgre, fetchLatestGrainsFromPostgre, fetchLatestCommoditiesFromPostgre, fetchLatestCommoditiesIndexFromPostgre, fetchLatestStockFromPostgre } from '../api/mainPageApi';
-import CommoditiesSection from '../components/main/CommoditiesSection';
-import CommoditiesIndexSection from '../components/main/CommoditiesIndexSection';
-import ExchangeSection from '../components/main/ExchangeSection';
-import ExchangePostgreSection from '../components/main/ExchangePostgreSection';
-import InterestRateSection from '../components/main/InterestRateSection';
-import StockSection from '../components/main/StockSection';
-import StockPostgreSection from '../components/main/StockPostgreSection';
-import GrainsSection from '../components/main/GrainsSection';
-import SectionContainer from '../components/main/SectionContainer';
-import MentalSection from '../components/main/MentalSection';
-import GrainsPostgreSection from '../components/main/GrainsPostgreSection';
-import CommoditiesPostgreSection from '../components/main/CommoditiesPostgreSection';
-import CommoditiesIndexPostgreSection from '../components/main/CommoditiesIndexPostgreSection';
+// MongoDB 관련 컴포넌트
+import CommoditiesSection from '../components/mongo/CommoditiesSection';
+import CommoditiesIndexSection from '../components/mongo/CommoditiesIndexSection';
+import ExchangeSection from '../components/mongo/ExchangeSection';
+import InterestRateSection from '../components/mongo/InterestRateSection';
+import StockSection from '../components/mongo/StockSection';
+import GrainsSection from '../components/mongo/GrainsSection';
+import SectionContainer from '../components/mongo/SectionContainer';
+import MentalSection from '../components/mongo/MentalSection';
+// PostgreSQL 관련 컴포넌트
+import StockPostgreSection from '../components/postgre/StockPostgreSection';
+import ExchangePostgreSection from '../components/postgre/ExchangePostgreSection';
+import GrainsPostgreSection from '../components/postgre/GrainsPostgreSection';
+import CommoditiesPostgreSection from '../components/postgre/CommoditiesPostgreSection';
+import CommoditiesIndexPostgreSection from '../components/postgre/CommoditiesIndexPostgreSection';
 
 const MainPage: React.FC = () => {
   // PostgreSQL 주식 데이터 상태
