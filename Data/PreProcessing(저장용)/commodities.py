@@ -106,6 +106,11 @@ def make_and_save_commodities():
     from sqlalchemy import text
     with engine.begin() as conn:
         for _, row in spot_pivot_reset.iterrows():
+            # 중복 체크: 같은 날짜 데이터가 이미 있으면 skip
+            check_sql = 'SELECT 1 FROM public.commodities WHERE date = :date'
+            result = conn.execute(text(check_sql), {'date': row['date']}).fetchone()
+            if result:
+                continue
             placeholders = ', '.join([f':{col}' for col in expected_cols])
             columns = ', '.join(expected_cols)
             sql = f'INSERT INTO public.commodities ({columns}) VALUES ({placeholders})'
@@ -125,6 +130,11 @@ def make_and_save_commodities():
     grains_pivot_reset = grains_pivot_reset[grains_expected_cols]
     with engine.begin() as conn:
         for _, row in grains_pivot_reset.iterrows():
+            # 중복 체크: 같은 날짜 데이터가 이미 있으면 skip
+            check_sql = 'SELECT 1 FROM public.grains WHERE date = :date'
+            result = conn.execute(text(check_sql), {'date': row['date']}).fetchone()
+            if result:
+                continue
             placeholders = ', '.join([f':{col}' for col in grains_expected_cols])
             columns = ', '.join(grains_expected_cols)
             sql = f'INSERT INTO public.grains ({columns}) VALUES ({placeholders})'

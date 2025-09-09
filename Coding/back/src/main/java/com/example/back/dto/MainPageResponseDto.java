@@ -9,6 +9,10 @@ import com.example.back.dto.interest.*;
 import com.example.back.dto.stock.*;
 import java.util.List;
 
+import com.example.back.dto.mental.ConsumerSentimentDto;
+import com.example.back.dto.mental.EconomicSentimentDto;
+import com.example.back.dto.mental.NewsSentimentDto;
+
 import lombok.*;
 
 @Getter
@@ -51,4 +55,9 @@ public class MainPageResponseDto {
     private List<NasdaqDto> nasdaqList;
     private List<KospiDto> kospiList;
     private List<KosdaqDto> kosdaqList;
+
+    // 멘탈(심리지수) 상세 리스트
+    private List<ConsumerSentimentDto> consumerSentimentList;
+    private List<EconomicSentimentDto> economicSentimentList;
+    private List<NewsSentimentDto> newsSentimentList;
 }

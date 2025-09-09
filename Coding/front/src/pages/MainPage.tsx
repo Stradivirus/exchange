@@ -11,6 +11,7 @@ import StockSection from '../components/main/StockSection';
 import StockPostgreSection from '../components/main/StockPostgreSection';
 import GrainsSection from '../components/main/GrainsSection';
 import SectionContainer from '../components/main/SectionContainer';
+import MentalSection from '../components/main/MentalSection';
 import GrainsPostgreSection from '../components/main/GrainsPostgreSection';
 import CommoditiesPostgreSection from '../components/main/CommoditiesPostgreSection';
 import CommoditiesIndexPostgreSection from '../components/main/CommoditiesIndexPostgreSection';
@@ -260,6 +261,13 @@ const MainPage: React.FC = () => {
         ) : (
           <CommoditiesIndexPostgreSection data={commoditiesIndexPostgre || []} onBack={handleBackToDefaultCommoditiesIndex} />
         )}
+      </SectionContainer>
+      <SectionContainer>
+        <MentalSection
+          consumerSentimentList={data.consumerSentimentList || []}
+          economicSentimentList={data.economicSentimentList || []}
+          newsSentimentList={data.newsSentimentList || []}
+        />
       </SectionContainer>
       <SectionContainer>
         <InterestRateSection data={[...(data.korBaseRateList || []), ...(data.usFedRateList || [])]} />

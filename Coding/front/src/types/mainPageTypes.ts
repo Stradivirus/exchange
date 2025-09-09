@@ -1,3 +1,35 @@
+// 심리지수(멘탈) DTO 타입
+export interface ConsumerSentimentDto {
+  date: string;
+  statCode: string;
+  itemCode: string;
+  itemName: string;
+  unitName: string;
+  value: number;
+  createdAt: string;
+  regionCode?: string;
+  regionName?: string;
+}
+
+export interface EconomicSentimentDto {
+  date: string;
+  statCode: string;
+  itemCode: string;
+  itemName: string;
+  unitName: string;
+  value: number;
+  createdAt: string;
+}
+
+export interface NewsSentimentDto {
+  date: string;
+  statCode: string;
+  itemCode: string;
+  itemName: string;
+  unitName: string;
+  value: number;
+  createdAt: string;
+}
 // src/types/mainPageTypes.ts
 
 
@@ -70,4 +102,9 @@ export interface MainPageResponseDto {
   nasdaqList: StockDto[];
   kospiList: StockDto[];
   kosdaqList: StockDto[];
+
+  // 멘탈(심리지수)
+  consumerSentimentList: ConsumerSentimentDto[];
+  economicSentimentList: EconomicSentimentDto[];
+  newsSentimentList: NewsSentimentDto[];
 }

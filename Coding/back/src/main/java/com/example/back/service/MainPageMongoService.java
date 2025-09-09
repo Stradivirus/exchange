@@ -13,6 +13,8 @@ import com.example.back.mongo.exchange.*;
 import com.example.back.mongo.interest.*;
 import com.example.back.mongo.stock.*;
 import com.example.back.mongo.grains.*;
+import com.example.back.mongo.mental.*;
+import com.example.back.dto.mental.*;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,11 @@ public class MainPageMongoService {
     private final CoffeeRepository coffeeRepository;
     private final SugarRepository sugarRepository;
 
+    // 멘탈(심리지수) 관련 Repository
+    private final ConsumerSentimentRepository consumerSentimentRepository;
+    private final EconomicSentimentRepository economicSentimentRepository;
+    private final NewsSentimentRepository newsSentimentRepository;
+
     public MainPageResponseDto getLatestMainPageInfo() {
     // grains
     Rice rice = riceRepository.findTopByOrderByDateDesc();
@@ -70,6 +77,12 @@ public class MainPageMongoService {
         Kosdaq kosdaq = kosdaqRepository.findTopByOrderByDateDesc();
         KorBaseRate korBaseRate = korBaseRateRepository.findTopByOrderByDateDesc();
         UsFedRate usFedRate = usFedRateRepository.findTopByOrderByDateDesc();
+
+    // 멘탈(심리지수)
+    ConsumerSentiment consumerSentiment = consumerSentimentRepository.findTopByOrderByDateDesc();
+    EconomicSentiment economicSentiment = economicSentimentRepository.findTopByOrderByDateDesc();
+    // NewsSentiment 최신 5개 리스트
+    java.util.List<NewsSentiment> newsSentimentList = newsSentimentRepository.findTop5ByOrderByDateDesc();
 
         return MainPageResponseDto.builder()
             // grains
@@ -245,6 +258,50 @@ public class MainPageMongoService {
                 .low(kosdaq.getLow())
                 .volume(kosdaq.getVolume())
                 .build()) : Collections.emptyList())
+            // mental(심리지수)
+            .consumerSentimentList(consumerSentiment != null ? Collections.singletonList(toConsumerSentimentDto(consumerSentiment)) : Collections.emptyList())
+            .economicSentimentList(economicSentiment != null ? Collections.singletonList(toEconomicSentimentDto(economicSentiment)) : Collections.emptyList())
+            .newsSentimentList(newsSentimentList != null && !newsSentimentList.isEmpty() ?
+                newsSentimentList.stream().map(this::toNewsSentimentDto).toList() : Collections.emptyList())
             .build();
+    }
+
+    // 엔티티 -> DTO 변환 메서드
+    private ConsumerSentimentDto toConsumerSentimentDto(ConsumerSentiment entity) {
+        ConsumerSentimentDto dto = new ConsumerSentimentDto();
+        dto.setDate(entity.getDate());
+        dto.setStatCode(entity.getStatCode());
+        dto.setItemCode(entity.getItemCode());
+        dto.setItemName(entity.getItemName());
+        dto.setUnitName(entity.getUnitName());
+        dto.setValue(entity.getValue());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setRegionCode(entity.getRegionCode());
+        dto.setRegionName(entity.getRegionName());
+        return dto;
+    }
+
+    private EconomicSentimentDto toEconomicSentimentDto(EconomicSentiment entity) {
+        EconomicSentimentDto dto = new EconomicSentimentDto();
+        dto.setDate(entity.getDate());
+        dto.setStatCode(entity.getStatCode());
+        dto.setItemCode(entity.getItemCode());
+        dto.setItemName(entity.getItemName());
+        dto.setUnitName(entity.getUnitName());
+        dto.setValue(entity.getValue());
+        dto.setCreatedAt(entity.getCreatedAt());
+        return dto;
+    }
+
+    private NewsSentimentDto toNewsSentimentDto(NewsSentiment entity) {
+        NewsSentimentDto dto = new NewsSentimentDto();
+        dto.setDate(entity.getDate());
+        dto.setStatCode(entity.getStatCode());
+        dto.setItemCode(entity.getItemCode());
+        dto.setItemName(entity.getItemName());
+        dto.setUnitName(entity.getUnitName());
+        dto.setValue(entity.getValue());
+        dto.setCreatedAt(entity.getCreatedAt());
+        return dto;
     }
 }
