@@ -13,5 +13,4 @@ public class Sp500Dto {
     private Double high;
     private Double low;
     private Double volume;
-    private Date created_at;
 }

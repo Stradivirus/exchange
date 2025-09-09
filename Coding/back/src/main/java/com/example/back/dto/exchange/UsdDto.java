@@ -11,5 +11,4 @@ public class UsdDto {
     private Double rate;
     private String currency_code;
     private String unit_name;
-    private Date created_at;
 }

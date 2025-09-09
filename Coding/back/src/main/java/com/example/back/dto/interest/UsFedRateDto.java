@@ -9,5 +9,4 @@ import java.util.Date;
 public class UsFedRateDto {
     private Date date;
     private Double rate;
-    private Date created_at;
 }

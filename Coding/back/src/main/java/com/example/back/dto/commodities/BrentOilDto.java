@@ -14,5 +14,4 @@ public class BrentOilDto {
     private Double low;
     private Double volume;
     private Double price;
-    private Date created_at;
 }

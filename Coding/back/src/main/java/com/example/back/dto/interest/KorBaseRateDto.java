@@ -9,5 +9,4 @@ import java.util.Date;
 public class KorBaseRateDto {
     private Date date;
     private Double rate;
-    private Date created_at;
 }

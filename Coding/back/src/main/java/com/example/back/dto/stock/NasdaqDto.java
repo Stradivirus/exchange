@@ -13,5 +13,4 @@ public class NasdaqDto {
     private Double high;
     private Double low;
     private Double volume;
-    private Date created_at;
 }
