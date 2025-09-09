@@ -1,8 +1,5 @@
 import React from 'react';
 
-
-// import { GoldDto } from '../../types/mainPageTypes';
-
 interface Props {
   data: {
     goldList: any[];
