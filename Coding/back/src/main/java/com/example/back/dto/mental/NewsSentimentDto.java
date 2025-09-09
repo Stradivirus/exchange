@@ -23,6 +23,4 @@ public class NewsSentimentDto {
     public void setUnitName(String unitName) { this.unitName = unitName; }
     public Double getValue() { return value; }
     public void setValue(Double value) { this.value = value; }
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 }

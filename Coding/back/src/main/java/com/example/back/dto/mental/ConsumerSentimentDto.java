@@ -25,8 +25,6 @@ public class ConsumerSentimentDto {
     public void setUnitName(String unitName) { this.unitName = unitName; }
     public Double getValue() { return value; }
     public void setValue(Double value) { this.value = value; }
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
     public String getRegionCode() { return regionCode; }
     public void setRegionCode(String regionCode) { this.regionCode = regionCode; }
     public String getRegionName() { return regionName; }

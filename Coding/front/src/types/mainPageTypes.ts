@@ -6,7 +6,6 @@ export interface ConsumerSentimentDto {
   itemName: string;
   unitName: string;
   value: number;
-  createdAt: string;
   regionCode?: string;
   regionName?: string;
 }
@@ -18,7 +17,6 @@ export interface EconomicSentimentDto {
   itemName: string;
   unitName: string;
   value: number;
-  createdAt: string;
 }
 
 export interface NewsSentimentDto {
@@ -28,7 +26,6 @@ export interface NewsSentimentDto {
   itemName: string;
   unitName: string;
   value: number;
-  createdAt: string;
 }
 // src/types/mainPageTypes.ts
 

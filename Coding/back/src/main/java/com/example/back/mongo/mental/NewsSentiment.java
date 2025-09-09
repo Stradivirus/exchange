@@ -14,7 +14,6 @@ public class NewsSentiment {
     private String itemName;
     private String unitName;
     private Double value;
-    private Date createdAt;
 
     public String getId() { return id; }
     public Date getDate() { return date; }
@@ -23,5 +22,4 @@ public class NewsSentiment {
     public String getItemName() { return itemName; }
     public String getUnitName() { return unitName; }
     public Double getValue() { return value; }
-    public Date getCreatedAt() { return createdAt; }
 }

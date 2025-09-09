@@ -14,7 +14,6 @@ public class ConsumerSentiment {
     private String itemName;
     private String unitName;
     private Double value;
-    private Date createdAt;
     private String regionCode;
     private String regionName;
 
@@ -25,7 +24,6 @@ public class ConsumerSentiment {
     public String getItemName() { return itemName; }
     public String getUnitName() { return unitName; }
     public Double getValue() { return value; }
-    public Date getCreatedAt() { return createdAt; }
     public String getRegionCode() { return regionCode; }
     public String getRegionName() { return regionName; }
 }
