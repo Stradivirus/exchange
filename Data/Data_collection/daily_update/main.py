@@ -21,7 +21,8 @@ CATEGORIES = {
     'stock': 'stock_cron.py',
     'commodities': 'commodities_cron.py',
     'interest': 'interest_cron.py',
-    'mental': 'mental_cron.py'
+    'mental': 'mental_cron.py',
+    'economic': 'economic_cron.py'
 }
 
 

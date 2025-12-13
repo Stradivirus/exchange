@@ -8,14 +8,15 @@ import os
 # MongoDB 설정
 MONGO_URI = os.getenv(
     'MONGO_URI',
+    'mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 )
-MONGO_DB = os.getenv('MONGO_DB')
+MONGO_DB = os.getenv('MONGO_DB', 'exchange_all')
 
 # 한국은행 API 키
-BOK_API_KEY = os.getenv('BOK_API_KEY')
+BOK_API_KEY = os.getenv('BOK_API_KEY', 'GYMU5SDZ3BMQ9GWY2JAF')
 
 # FRED API 키
-FRED_API_KEY = os.getenv('FRED_API_KEY')
+FRED_API_KEY = os.getenv('FRED_API_KEY', 'be3c10f05ec901151d380553080f640e')
 
 # 통화 코드 매핑
 CURRENCY_CODES = {
@@ -88,3 +89,44 @@ INTEREST_RATE_CONFIG = {
         "series_id": "FEDFUNDS"
     }
 }
+
+# 경제지표 설정
+ECONOMIC_INDICATORS = [
+    {
+        "stat_code": "901Y009",
+        "indicator_name": "소비자물가지수(총지수)",
+        "item_code": "0",
+        "period": "M",
+        "collection_name": "cpi_index"
+    },
+    {
+        "stat_code": "402Y014",
+        "indicator_name": "수출물가지수(기본분류, 총지수)",
+        "item_code": "*AA",
+        "period": "M",
+        "collection_name": "export_import_price_index",
+        "type": "export"
+    },
+    {
+        "stat_code": "401Y015",
+        "indicator_name": "수입물가지수(기본분류, 총지수)",
+        "item_code": "*AA",
+        "period": "M",
+        "collection_name": "export_import_price_index",
+        "type": "import"
+    },
+    {
+        "stat_code": "511Y003",
+        "indicator_name": "물가인식(지난 1년)",
+        "item_code": "FMA",
+        "period": "M",
+        "collection_name": "inflation_expectation"
+    },
+    {
+        "stat_code": "511Y003",
+        "indicator_name": "향후1년 기대인플레이션율",
+        "item_code": "FMB",
+        "period": "M",
+        "collection_name": "inflation_expectation"
+    }
+]
