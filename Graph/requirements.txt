@@ -1,0 +1,17 @@
+pandas
+numpy
+plotly
+seaborn
+matplotlib
+scikit-learn
+tensorflow
+xgboost
+catboost
+lightgbm
+prophet
+sqlalchemy
+psycopg2-binary
+pymongo
+kaleido
+pmdarima
+statsmodels
