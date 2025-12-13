@@ -10,8 +10,8 @@ catboost
 lightgbm
 prophet
 sqlalchemy
-psycopg2-binary
 pymongo
 kaleido
 pmdarima
 statsmodels
+python-dotenv

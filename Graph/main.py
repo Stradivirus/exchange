@@ -1,97 +1,111 @@
 #!/usr/bin/env python3
-# ==========================================================================
-# Graph Main - GU 모듈 실행기 (Outputs 통합)
-# ==========================================================================
-
 import subprocess
 import sys
 import os
+import time
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, wait
+
+# 통합 설정 로드
+try:
+    import config
+except ImportError:
+    print("❌ 'config.py'가 없습니다.")
+    sys.exit(1)
+
+# 자식 프로세스용 환경변수 생성
+COMMON_ENV = os.environ.copy()
+COMMON_ENV.update({
+    "MONGO_URI": config.MONGO_URI,
+    "DB_NAME": config.DB_NAME,
+    "N_JOBS_LIMIT": config.SYSTEM_CONFIG["N_JOBS_LIMIT"],
+    "OMP_NUM_THREADS": config.SYSTEM_CONFIG["OMP_NUM_THREADS"],
+    "PYTHONUTF8": "1"
+})
+
+GRAPH_ROOT = Path(__file__).parent
+
+def run_script(script_info):
+    path, script_name, description = script_info
+    full_path = GRAPH_ROOT / path
+    
+    if path == "hong":
+        COMMON_ENV["RESULTS_DIR"] = config.OUTPUT_PATHS["hong"]
+    
+    print(f"⏳ [시작] {description} ({script_name})...")
+    start_time = time.time()
+    
+    try:
+        result = subprocess.run(
+            [sys.executable, script_name],
+            cwd=full_path,
+            env=COMMON_ENV, # 설정 주입
+            capture_output=True,
+            text=True
+        )
+        elapsed = time.time() - start_time
+        
+        output_msg = f"\n----- {description} Output -----\n{result.stdout}"
+        if result.stderr:
+            output_msg += f"\n[STDERR]\n{result.stderr}"
+        output_msg += f"\n--------------------------------"
+        print(output_msg)
+
+        if result.returncode == 0:
+            print(f"✅ [완료] {description} ({elapsed:.1f}초)")
+            return True
+        else:
+            print(f"❌ [실패] {description} (Exit Code: {result.returncode})")
+            return False
+
+    except Exception as e:
+        print(f"❌ [에러] {description}: {e}")
+        return False
 
 def main():
-    """
-    hong, gu, kim 폴더의 main.py를 모두 실행하는 통합 메인
-    """
-    print("🚀 통합 금융 예측 분석 시작...")
-    graph_root = Path(__file__).parent
+    print("🚀 금융 데이터 분석 시스템 가동 (Centralized Config)")
+    start_global = time.time()
 
-    import threading
+    # 폴더 생성
+    for path in config.OUTPUT_PATHS.values():
+        os.makedirs(path, exist_ok=True)
 
-    # hong/main.py 병렬 실행 함수
-    def run_hong():
-        hong_path = graph_root / "hong"
-        if not (hong_path / "main.py").exists():
-            print("❌ hong/main.py 파일을 찾을 수 없습니다!")
-            sys.exit(1)
-        print("\n===== [1/3] hong/main.py 실행 =====")
-        result_hong = subprocess.run([
-            sys.executable, "main.py"
-        ], cwd=hong_path)
-        if result_hong.returncode == 0:
-            print("✅ hong/main.py 분석 완료!")
-        else:
-            print(f"❌ hong/main.py 분석 실패 (코드: {result_hong.returncode})")
-            sys.exit(1)
+    gu_task = ("gu", "main.py", "GU: 딥러닝/시계열 통합 분석")
+    
+    light_tasks = [
+        ("kim", "gold.py", "KIM: 금 시세 분석"),
+        ("kim", "news.py", "KIM: 뉴스 데이터 분석"),
+        ("hong", "hong_allcurrency.py", "HONG: 환율 전체 분석"),
+        ("hong", "hong_expimp.py", "HONG: 수출입 지표 분석"),
+        ("hong", "hong_interest.py", "HONG: 금리 지표 분석"),
+        ("hong", "hong_predictions.py", "HONG: CatBoost 예측 모델")
+    ]
 
-    # kim/gold.py, kim/news.py 병렬 실행 함수
-    def run_kim():
-        kim_path = graph_root / "kim"
-        kim_files = [("gold.py", "금 예측"), ("news.py", "뉴스 분석")]
-        for idx, (fname, desc) in enumerate(kim_files, start=1):
-            kim_file = kim_path / fname
-            if not kim_file.exists():
-                print(f"❌ kim/{fname} 파일을 찾을 수 없습니다!")
-                sys.exit(1)
-            print(f"\n===== [3.{idx}/3] kim/{fname}({desc}) 실행 =====")
-            result_kim = subprocess.run([
-                sys.executable, fname
-            ], cwd=kim_path)
-            if result_kim.returncode == 0:
-                print(f"✅ kim/{fname}({desc}) 분석 완료!")
-            else:
-                print(f"❌ kim/{fname}({desc}) 분석 실패 (코드: {result_kim.returncode})")
-                sys.exit(1)
+    executor = ThreadPoolExecutor(max_workers=2)
+    futures = []
 
-    def run_gu():
-        gu_path = graph_root / "gu"
-        unified_output = graph_root / "outputs" / "gu"
-        unified_output.mkdir(parents=True, exist_ok=True)
-        if not (gu_path / "main.py").exists():
-            print("❌ gu/main.py 파일을 찾을 수 없습니다!")
-            sys.exit(1)
-        print("\n===== [2/3] gu/main.py 실행 =====")
-        env = os.environ.copy()
-        env["OUTPUT_FOLDER"] = str(unified_output)
-        result_gu = subprocess.run([
-            sys.executable, "main.py"
-        ], cwd=gu_path, env=env)
-        if result_gu.returncode == 0:
-            print("✅ gu/main.py 분석 완료!")
-            print(f"📁 gu 결과 저장 위치: {unified_output}")
-        else:
-            print(f"❌ gu/main.py 분석 실패 (코드: {result_gu.returncode})")
-            sys.exit(1)
+    print("\n🔄 병렬 분석 시작...")
+    for task in light_tasks:
+        futures.append(executor.submit(run_script, task))
 
+    print("\n🧠 GU 모듈 실행 진입...")
+    gu_success = run_script(gu_task)
 
-    # gu, kim 병렬 실행 & 둘 중 하나라도 끝나면 hong 실행
-    hong_started = threading.Event()
+    print("\n⏳ Light Tasks 대기 중...")
+    wait(futures)
 
-    def run_and_trigger_hong(target_func):
-        try:
-            target_func()
-        finally:
-            if not hong_started.is_set():
-                hong_started.set()
-                run_hong()
+    failed = 0
+    if not gu_success: failed += 1
+    for f in futures:
+        if not f.result(): failed += 1
 
-    t_gu = threading.Thread(target=lambda: run_and_trigger_hong(run_gu))
-    t_kim = threading.Thread(target=lambda: run_and_trigger_hong(run_kim))
-    t_gu.start()
-    t_kim.start()
-    t_gu.join()
-    t_kim.join()
-
-    print("\n🎉 모든 분석 완료! gu + kim + hong 결과가 통합되었습니다.")
+    elapsed = time.time() - start_global
+    print(f"\n{'='*60}")
+    if failed == 0:
+        print(f"🎉 모든 작업 완료! ({elapsed:.1f}초)")
+    else:
+        print(f"⚠️ {failed}개 작업 실패.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

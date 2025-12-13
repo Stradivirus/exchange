@@ -131,7 +131,7 @@ def generate_final_report(all_results, all_predictions, y_train, y_test, target_
     
     # AI 트레이딩 어드바이저 실행
     try:
-        from config import PROJECT_CONFIGS
+        from Graph.gu.gu_config import PROJECT_CONFIGS
         forecast_days = PROJECT_CONFIGS[project_name]['forecast_days']
         
         run_advisor_pipeline(all_results, all_predictions, y_test, target_col, forecast_days, project_name)
