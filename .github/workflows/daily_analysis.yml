@@ -79,4 +79,3 @@ jobs:
           --bucket-name Exchange \
           --src-dir Graph/outputs \
           --overwrite \
-          --force
