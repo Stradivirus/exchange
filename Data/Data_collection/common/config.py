@@ -8,15 +8,14 @@ import os
 # MongoDB 설정
 MONGO_URI = os.getenv(
     'MONGO_URI',
-    'mongodb+srv://stradivirus:1q2w3e4r6218@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 )
-MONGO_DB = os.getenv('MONGO_DB', 'exchange_all')
+MONGO_DB = os.getenv('MONGO_DB')
 
 # 한국은행 API 키
-BOK_API_KEY = os.getenv('BOK_API_KEY', 'GYMU5SDZ3BMQ9GWY2JAF')
+BOK_API_KEY = os.getenv('BOK_API_KEY')
 
 # FRED API 키
-FRED_API_KEY = os.getenv('FRED_API_KEY', 'be3c10f05ec901151d380553080f640e')
+FRED_API_KEY = os.getenv('FRED_API_KEY')
 
 # 통화 코드 매핑
 CURRENCY_CODES = {
