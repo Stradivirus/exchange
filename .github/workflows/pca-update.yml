@@ -37,7 +37,7 @@ jobs:
           PG_USER: ${{ secrets.PG_USER }}
           PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
         run: |
-          cd Data/test
+          cd Data/PreProcessing
           python all_pca_cron.py
       
       - name: Upload logs on failure
@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pca-error-logs
-          path: Data/test/*.log
+          path: Data/PreProcessing/*.log
           retention-days: 7
       
       - name: Notify on success
