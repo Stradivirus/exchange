@@ -23,7 +23,7 @@ services:
       dockerfile: docker/front.dockerfile
     container_name: exchange-front
     ports:
-      - "8004:80"
+      - "8005:80"
     depends_on:
       - back
     restart: unless-stopped
