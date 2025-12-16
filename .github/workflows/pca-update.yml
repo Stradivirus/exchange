@@ -24,29 +24,28 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # PostgreSQL 접속용 라이브러리(psycopg2) 필수
           pip install pandas sqlalchemy psycopg2-binary scikit-learn
       
-      # [핵심] SSH 터널링 설정 (OCI_SSH 키 사용)
+      # [수정됨] SSH 터널링: PG_HOST(록키 서버)로 접속
       - name: Setup SSH Tunnel to PostgreSQL
         env:
-          SSH_KEY: ${{ secrets.OCI_SSH }}       # 등록하신 키 이름 (OCI_SSH)
-          SSH_HOST: ${{ secrets.SSH_HOST }}     # 서버 IP
-          SSH_USER: ${{ secrets.SSH_USER }}     # 접속 계정 (opc, ubuntu 등)
+          SSH_KEY: ${{ secrets.OCI_SSH }}       # 등록하신 키 (OCI_SSH)
+          SSH_HOST: ${{ secrets.PG_HOST }}      # [중요] 호스트를 PG_HOST로 설정
+          SSH_USER: rocky                       # [중요] 사용자를 rocky로 설정
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          # 백그라운드(-f)에서 터널링(-N)만 연결
-          # 로컬 5432 포트를 -> 서버(127.0.0.1)의 5432 포트로 연결
+          # 1. SSH_HOST(DB서버)에 rocky 계정으로 접속
+          # 2. 로컬 5432 포트를 -> 원격지(DB서버)의 127.0.0.1:5432로 연결
           ssh -o StrictHostKeyChecking=no -f -N -i ~/.ssh/id_rsa -L 5432:127.0.0.1:5432 $SSH_USER@$SSH_HOST
           
-          echo "✅ SSH Tunneling Established!"
+          echo "✅ SSH Tunneling Established to $SSH_HOST as $SSH_USER"
 
       - name: Run PCA calculation
         env:
-          # 터널을 뚫었으므로 DB 주소는 '127.0.0.1' (로컬)이 됩니다.
+          # 파이썬은 로컬 터널(127.0.0.1)을 통해 DB에 접속
           PG_HOST: "127.0.0.1"
           PG_DB: ${{ secrets.PG_DB }}
           PG_USER: ${{ secrets.PG_USER }}
