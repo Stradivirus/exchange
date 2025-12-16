@@ -2,12 +2,9 @@
 name: PCA Data Update
 
 on:
-  # 하루 2번 실행: UTC 00:10, 12:10 (한국시간 09:10, 21:10)
-  # 데이터 수집 후 10분 뒤 실행
   schedule:
+    # 하루 2번 실행: UTC 00:10, 12:10 (한국시간 09:10, 21:10)
     - cron: '10 0,12 * * *'
-  
-  # 수동 실행 가능
   workflow_dispatch:
 
 jobs:
@@ -27,12 +24,30 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          # PostgreSQL 접속용 라이브러리(psycopg2) 필수
           pip install pandas sqlalchemy psycopg2-binary scikit-learn
       
+      # [핵심] SSH 터널링 설정 (OCI_SSH 키 사용)
+      - name: Setup SSH Tunnel to PostgreSQL
+        env:
+          SSH_KEY: ${{ secrets.OCI_SSH }}       # 등록하신 키 이름 (OCI_SSH)
+          SSH_HOST: ${{ secrets.SSH_HOST }}     # 서버 IP
+          SSH_USER: ${{ secrets.SSH_USER }}     # 접속 계정 (opc, ubuntu 등)
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # 백그라운드(-f)에서 터널링(-N)만 연결
+          # 로컬 5432 포트를 -> 서버(127.0.0.1)의 5432 포트로 연결
+          ssh -o StrictHostKeyChecking=no -f -N -i ~/.ssh/id_rsa -L 5432:127.0.0.1:5432 $SSH_USER@$SSH_HOST
+          
+          echo "✅ SSH Tunneling Established!"
+
       - name: Run PCA calculation
         env:
-          # PostgreSQL 접속 정보
-          PG_HOST: ${{ secrets.PG_HOST }}
+          # 터널을 뚫었으므로 DB 주소는 '127.0.0.1' (로컬)이 됩니다.
+          PG_HOST: "127.0.0.1"
           PG_DB: ${{ secrets.PG_DB }}
           PG_USER: ${{ secrets.PG_USER }}
           PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
