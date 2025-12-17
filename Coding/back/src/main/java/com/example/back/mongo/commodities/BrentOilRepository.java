@@ -1,9 +1,9 @@
 package com.example.back.mongo.commodities;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-
+import java.util.List;
 public interface BrentOilRepository extends MongoRepository<BrentOil, String> {
     BrentOil findTopByOrderByDateDesc();
 
-    List<Gold> findTop30ByOrderByDateDesc();
+    List<BrentOil> findTop30ByOrderByDateDesc();
 }
