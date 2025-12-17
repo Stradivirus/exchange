@@ -15,7 +15,6 @@ const CommoditiesIndexPostgreSection: React.FC<Props> = ({ data, onBack }) => {
   return (
     <div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #0001', minWidth: 400 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        {/* 수정됨 */}
         <span style={{ fontWeight: 700, fontSize: '1.5rem' }}>지수 (최신 30일)</span>
         {onBack && (
           <button onClick={onBack} style={{ fontSize: 14, padding: '4px 12px' }}>돌아가기</button>
@@ -35,8 +34,8 @@ const CommoditiesIndexPostgreSection: React.FC<Props> = ({ data, onBack }) => {
               data.map((row, idx) => (
                 <tr key={row.date} style={{ background: idx % 2 === 0 ? '#fff' : '#fafbfc' }}>
                   <td style={{ padding: 8, border: '1px solid #eee', fontWeight: 500 }}>{row.date}</td>
-                  <td style={{ padding: 8, border: '1px solid #eee' }}>{row.dxy ?? '-'}</td>
-                  <td style={{ padding: 8, border: '1px solid #eee' }}>{row.vix ?? '-'}</td>
+                  <td style={{ padding: 8, border: '1px solid #eee' }}>{row.dxy?.toFixed(2) ?? '-'}</td>
+                  <td style={{ padding: 8, border: '1px solid #eee' }}>{row.vix?.toFixed(2) ?? '-'}</td>
                 </tr>
               ))
             ) : (

@@ -17,7 +17,6 @@ const ExchangePostgreSection: React.FC<Props> = ({ data, onBack }) => {
 	return (
 		<div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #0001', minWidth: 400 }}>
 			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-				{/* 텍스트 수정 */}
 				<span style={{ fontWeight: 700, fontSize: '1.5rem' }}>환율 (최신 30일)</span>
 				{onBack && (
 					<button onClick={onBack} style={{ fontSize: 14, padding: '4px 12px' }}>돌아가기</button>
@@ -39,10 +38,10 @@ const ExchangePostgreSection: React.FC<Props> = ({ data, onBack }) => {
 							data.map((row, idx) => (
 								<tr key={row.date} style={{ background: idx % 2 === 0 ? '#fff' : '#fafbfc' }}>
 									<td style={{ padding: 8, border: '1px solid #eee', fontWeight: 500 }}>{row.date}</td>
-									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.usd ?? '-'}</td>
-									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.jpy ?? '-'}</td>
-									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.eur ?? '-'}</td>
-									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.cny ?? '-'}</td>
+									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.usd?.toFixed(2) ?? '-'}</td>
+									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.jpy?.toFixed(2) ?? '-'}</td>
+									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.eur?.toFixed(2) ?? '-'}</td>
+									<td style={{ padding: 8, border: '1px solid #eee' }}>{row.cny?.toFixed(2) ?? '-'}</td>
 								</tr>
 							))
 						) : (
