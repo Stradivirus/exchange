@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface KorBaseRateRepository extends MongoRepository<KorBaseRate, String> {
     KorBaseRate findTopByOrderByDateDesc();
+
+    List<UsFedRate> findTop30ByOrderByDateDesc();
 }

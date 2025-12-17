@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface UsdRepository extends MongoRepository<Usd, String> {
     Usd findTopByOrderByDateDesc();
+
+    List<Usd> findTop30ByOrderByDateDesc();
 }

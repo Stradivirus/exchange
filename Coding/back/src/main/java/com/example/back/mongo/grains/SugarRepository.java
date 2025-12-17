@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface SugarRepository extends MongoRepository<Sugar, String> {
     Sugar findTopByOrderByDateDesc();
+
+    List<Corn> findTop30ByOrderByDateDesc();
 }

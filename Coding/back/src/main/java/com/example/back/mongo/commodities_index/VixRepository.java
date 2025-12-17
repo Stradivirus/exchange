@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface VixRepository extends MongoRepository<Vix, String> {
     Vix findTopByOrderByDateDesc();
+
+    List<Dxy> findTop30ByOrderByDateDesc();
 }

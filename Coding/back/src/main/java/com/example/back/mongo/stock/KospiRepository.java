@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface KospiRepository extends MongoRepository<Kospi, String> {
     Kospi findTopByOrderByDateDesc();
+
+    List<Sp500> findTop30ByOrderByDateDesc();
 }

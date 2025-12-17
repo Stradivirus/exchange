@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface CornRepository extends MongoRepository<Corn, String> {
     Corn findTopByOrderByDateDesc();
+
+    List<Corn> findTop30ByOrderByDateDesc();
 }

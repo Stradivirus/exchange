@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface JpyRepository extends MongoRepository<Jpy, String> {
     Jpy findTopByOrderByDateDesc();
+
+    List<Usd> findTop30ByOrderByDateDesc();
 }

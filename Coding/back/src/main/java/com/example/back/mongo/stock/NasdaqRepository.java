@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface NasdaqRepository extends MongoRepository<Nasdaq, String> {
     Nasdaq findTopByOrderByDateDesc();
+
+    List<Sp500> findTop30ByOrderByDateDesc();
 }
