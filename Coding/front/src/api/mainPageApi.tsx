@@ -6,32 +6,32 @@ export async function fetchTodayInfo() {
   return response.data;
 }
 
-// PostgreSQL 환율 최신 30개 조회 API
-export async function fetchLatestExchangeFromPostgre() {
-  const response = await axios.get('/api/postgre/exchange/latest30');
+// [수정] 환율 최신 30개 조회 API (Mongo)
+export async function fetchLatestExchange() {
+  const response = await axios.get('/api/mongo/exchange/latest30');
   return response.data;
 }
 
-// PostgreSQL 곡물 최신 30개 조회 API
-export async function fetchLatestGrainsFromPostgre() {
-  const response = await axios.get('/api/postgre/grains/latest30');
+// [수정] 곡물 최신 30개 조회 API (Mongo)
+export async function fetchLatestGrains() {
+  const response = await axios.get('/api/mongo/grains/latest30');
   return response.data;
 }
 
-// PostgreSQL 원자재 최신 30개 조회 API
-export async function fetchLatestCommoditiesFromPostgre() {
-  const response = await axios.get('/api/postgre/commodities/latest30');
+// [수정] 원자재 최신 30개 조회 API (Mongo)
+export async function fetchLatestCommodities() {
+  const response = await axios.get('/api/mongo/commodities/latest30');
   return response.data;
 }
 
-// PostgreSQL 지수 최신 30개 조회 API
-export async function fetchLatestCommoditiesIndexFromPostgre() {
-  const response = await axios.get('/api/postgre/commodities_index/latest30');
+// [수정] 지수 최신 30개 조회 API (Mongo)
+export async function fetchLatestCommoditiesIndex() {
+  const response = await axios.get('/api/mongo/commodities_index/latest30');
   return response.data;
 }
 
-// PostgreSQL 주식 최신 30개 조회 API
-export async function fetchLatestStockFromPostgre() {
-  const response = await axios.get('/api/postgre/stock/latest30');
+// [수정] 주식 최신 30개 조회 API (Mongo)
+export async function fetchLatestStock() {
+  const response = await axios.get('/api/mongo/stock/latest30');
   return response.data;
 }

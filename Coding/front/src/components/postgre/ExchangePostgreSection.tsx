@@ -17,7 +17,8 @@ const ExchangePostgreSection: React.FC<Props> = ({ data, onBack }) => {
 	return (
 		<div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px #0001', minWidth: 400 }}>
 			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-				<span style={{ fontWeight: 700, fontSize: '1.5rem' }}>환율 (PostgreSQL)</span>
+				{/* 텍스트 수정 */}
+				<span style={{ fontWeight: 700, fontSize: '1.5rem' }}>환율 (최신 30일)</span>
 				{onBack && (
 					<button onClick={onBack} style={{ fontSize: 14, padding: '4px 12px' }}>돌아가기</button>
 				)}
