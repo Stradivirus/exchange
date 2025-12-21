@@ -1,26 +1,26 @@
 # daily_update/exchange_cron.py
 """
-환율 일일 업데이트 (최근 5일)
+환율 일일 업데이트
+- 수정사항: 최근 5일 고정 -> DB 마지막 저장일 기준 자동 증분 업데이트
 """
 import sys
 sys.path.append('..')
 
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 from common import (
     get_mongo_client, get_collection, save_records, create_date_index,
-    BOK_API_KEY, CURRENCY_CODES, get_recent_date_range, print_summary
+    BOK_API_KEY, CURRENCY_CODES, print_summary, get_latest_record
 )
 
 
-def get_recent_exchange_rates(currency_code):
-    """최근 환율 데이터 조회"""
-    start_date, end_date = get_recent_date_range(days_back=5)
+def get_exchange_rates_by_period(currency_code, start_date, end_date):
+    """지정된 기간의 환율 데이터 조회"""
     stat_code = "731Y001"
     
-    url = f"https://ecos.bok.or.kr/api/StatisticSearch/{BOK_API_KEY}/json/kr/1/100/{stat_code}/D/{start_date}/{end_date}/{currency_code}"
+    url = f"https://ecos.bok.or.kr/api/StatisticSearch/{BOK_API_KEY}/json/kr/1/1000/{stat_code}/D/{start_date}/{end_date}/{currency_code}"
     
     try:
         response = requests.get(url, timeout=30)
@@ -56,18 +56,40 @@ def main():
     
     client = get_mongo_client()
     total_new = 0
+    today = datetime.now()
     
     for currency_code, currency_name in CURRENCY_CODES.items():
         print(f"\n--- {currency_name} 최신 데이터 확인 중 ---")
         
-        time.sleep(1)
+        collection = get_collection(client, currency_name)
+        create_date_index(collection, [("date", 1), ("currency_code", 1)])
         
-        df = get_recent_exchange_rates(currency_code)
+        # 1. DB에서 마지막 날짜 확인
+        latest_doc = get_latest_record(collection)
+        
+        if latest_doc:
+            last_date = latest_doc['date']
+            start_dt = last_date + timedelta(days=1)
+            
+            if start_dt.date() > today.date():
+                print(f"{currency_name}: 이미 최신 데이터임 ({last_date.strftime('%Y-%m-%d')})")
+                continue
+                
+            start_date_str = start_dt.strftime('%Y%m%d')
+        else:
+            # 데이터 없으면 1년치
+            start_date_str = (today - timedelta(days=365)).strftime('%Y%m%d')
+            print(f"{currency_name}: 초기 데이터 수집")
+            
+        end_date_str = today.strftime('%Y%m%d')
+        print(f"조회 기간: {start_date_str} ~ {end_date_str}")
+        
+        time.sleep(0.5)
+        
+        # 2. 데이터 조회 및 저장
+        df = get_exchange_rates_by_period(currency_code, start_date_str, end_date_str)
         
         if not df.empty:
-            collection = get_collection(client, currency_name)
-            create_date_index(collection, [("date", 1), ("currency_code", 1)])
-            
             records = df.to_dict('records')
             inserted, updated = save_records(
                 collection,
@@ -88,7 +110,7 @@ def main():
                     latest['date']
                 )
             else:
-                print(f"{currency_name}: 변경사항 없음")
+                print(f"{currency_name}: 기간 내 새로운 데이터 없음 (휴장일 등)")
         else:
             print(f"{currency_name}: 새로운 데이터 없음")
     
