@@ -1,7 +1,6 @@
 # daily_update/interest_cron.py
 """
-한국 + 미국 기준금리 일일 업데이트
-- 수정사항: 한국 기준금리 조회 기간을 DB 마지막 날짜 기준으로 변경
+한국 + 미국 기준금리 일일 업데이트 (DB 날짜 기준 증분 업데이트)
 """
 import sys
 sys.path.append('..')
@@ -12,7 +11,7 @@ from datetime import datetime, timedelta
 from common import (
     get_mongo_client, get_collection, create_date_index,
     BOK_API_KEY, FRED_API_KEY, INTEREST_RATE_CONFIG,
-    get_recent_date_range, get_latest_record
+    get_latest_record
 )
 
 
@@ -28,15 +27,15 @@ def check_korea_rates(client):
         
         # 1. DB에서 최신 데이터 조회
         latest_db = get_latest_record(collection)
-        
         today = datetime.now()
+        
         if latest_db:
             prev_rate = latest_db['rate']
             last_date = latest_db['date']
             
             # 마지막 저장일 다음날부터 조회
             start_dt = last_date + timedelta(days=1)
-            # 만약 이미 최신이면(오늘 날짜까지 있으면) 스킵
+            
             if start_dt.date() > today.date():
                 print("한국 기준금리: 이미 최신 데이터임")
                 return 0
@@ -44,12 +43,10 @@ def check_korea_rates(client):
             start_date = start_dt.strftime('%Y%m%d')
         else:
             prev_rate = None
-            # 데이터 없으면 최근 1년 조회
             start_date = (today - timedelta(days=365)).strftime('%Y%m%d')
             print("한국 기준금리: 초기 데이터 수집")
 
         end_date = today.strftime('%Y%m%d')
-        
         print(f"조회 기간: {start_date} ~ {end_date}")
         
         url = f"https://ecos.bok.or.kr/api/StatisticSearch/{BOK_API_KEY}/json/kr/1/100/{config['stat_code']}/D/{start_date}/{end_date}/{config['item_code']}"
@@ -66,7 +63,7 @@ def check_korea_rates(client):
                     current_rate = float(row['DATA_VALUE'])
                     current_date = datetime.strptime(row['TIME'], '%Y%m%d')
                     
-                    # 금리가 변동되었거나, 데이터가 비어있던 경우 저장
+                    # 금리가 변동되었거나, 데이터가 처음인 경우 저장
                     if prev_rate is None or current_rate != prev_rate:
                         record = {
                             'date': current_date,
@@ -117,16 +114,17 @@ def check_us_rates(client):
         collection = get_collection(client, config['collection_name'])
         create_date_index(collection, [("date", 1)])
         
-        # FRED는 데이터 양이 적으므로 기존 로직(최근 90일 조회 후 비교) 유지해도 무방하나,
-        # 안전장치로 로직 흐름만 동일하게 유지
         fred = Fred(api_key=FRED_API_KEY)
         
-        start_date, _ = get_recent_date_range(days_back=90, date_format='%Y-%m-%d')
+        # 미국 금리는 데이터 양이 적으므로 안전하게 최근 3개월치 확인
+        today = datetime.now()
+        start_date = (today - timedelta(days=90)).strftime('%Y-%m-%d')
+        
         fed_rate_data = fred.get_series(config['series_id'], start=start_date)
         
         if not fed_rate_data.empty:
-            latest_fred_date = fed_rate_data.index[-1]
-            latest_fred_rate = fed_rate_data.iloc[-1]
+            latest_fred_date = fed_rate_data.index[-1].to_pydatetime()
+            latest_fred_rate = float(fed_rate_data.iloc[-1])
             
             latest_db = get_latest_record(collection)
             
@@ -135,8 +133,8 @@ def check_us_rates(client):
                 latest_db_date = latest_db['date']
                 latest_db_rate = latest_db['rate']
                 
-                # DB 날짜보다 FRED 날짜가 더 최신이거나, 값이 바뀐 경우
-                if (latest_fred_date.to_pydatetime().date() > latest_db_date.date() or
+                # 날짜가 더 최신이거나 값이 다를 때
+                if (latest_fred_date.date() > latest_db_date.date() or
                     abs(latest_fred_rate - latest_db_rate) >= 0.01):
                     should_update = True
             else:
@@ -144,8 +142,8 @@ def check_us_rates(client):
             
             if should_update:
                 record = {
-                    'date': latest_fred_date.to_pydatetime(),
-                    'rate': float(latest_fred_rate),
+                    'date': latest_fred_date,
+                    'rate': latest_fred_rate,
                     'type': 'fed_funds_rate',
                     'country': 'USA',
                     'source': 'FRED_API',
@@ -173,18 +171,11 @@ def check_us_rates(client):
 
 
 def main():
-    """메인 실행"""
     print(f"=== 기준금리 일일 업데이트 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
-    
     client = get_mongo_client()
-    
-    total_new = 0
-    total_new += check_korea_rates(client)
-    total_new += check_us_rates(client)
-    
+    total_new = check_korea_rates(client) + check_us_rates(client)
     print(f"\n=== 업데이트 완료 - 총 신규: {total_new}개 ===")
     client.close()
-
 
 if __name__ == "__main__":
     main()
