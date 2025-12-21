@@ -1,131 +1,66 @@
 # common/db_utils.py
-"""
-MongoDB 관련 공통 함수
-"""
-from pymongo import MongoClient
-from datetime import datetime
-from typing import List, Dict, Any, Optional
-from .config import MONGO_URI, MONGO_DB
-
+from pymongo import MongoClient, UpdateOne, DESCENDING
+from common.config import MONGO_URI, MONGO_DB
 
 def get_mongo_client():
-    """MongoDB 클라이언트 생성"""
+    """MongoDB 클라이언트 반환"""
     return MongoClient(MONGO_URI)
 
-
-def get_collection(client, collection_name: str):
+def get_collection(client, collection_name):
     """컬렉션 반환"""
     db = client[MONGO_DB]
     return db[collection_name]
 
+def create_date_index(collection, index_fields):
+    """인덱스 생성 (중복 방지 및 조회 성능 향상)"""
+    # date 필드가 있으면 기본 인덱스 생성
+    existing_indexes = collection.index_information()
+    
+    # 복합 인덱스 이름 생성
+    index_name = "_".join([f"{field}_{direction}" for field, direction in index_fields])
+    
+    if index_name not in existing_indexes:
+        collection.create_index(index_fields, unique=True)
+        # print(f"인덱스 생성 완료: {index_name}")
 
-def create_date_index(collection, index_fields: List[tuple], unique: bool = True):
+def get_latest_record(collection, sort_field="date"):
     """
-    날짜 기반 인덱스 생성
-    
-    Args:
-        collection: MongoDB 컬렉션
-        index_fields: 인덱스 필드 리스트 [("date", 1), ("currency_code", 1)]
-        unique: 유니크 제약 여부
-    """
-    try:
-        collection.create_index(index_fields, unique=unique)
-    except Exception as e:
-        print(f"인덱스 생성 오류 (무시 가능): {e}")
-
-
-def save_records(collection, records: List[Dict[str, Any]], 
-                unique_fields: List[str], verbose: bool = True) -> tuple:
-    """
-    레코드 일괄 저장 (upsert 방식)
-    
-    Args:
-        collection: MongoDB 컬렉션
-        records: 저장할 레코드 리스트
-        unique_fields: 중복 체크할 필드 리스트 (예: ["date", "currency_code"])
-        verbose: 로그 출력 여부
-    
-    Returns:
-        (inserted_count, updated_count) 튜플
-    """
-    inserted_count = 0
-    updated_count = 0
-    
-    for record in records:
-        try:
-            # 중복 체크를 위한 쿼리 생성
-            query = {field: record[field] for field in unique_fields}
-            
-            result = collection.replace_one(
-                query,
-                record,
-                upsert=True
-            )
-            
-            if result.upserted_id:
-                inserted_count += 1
-            elif result.modified_count > 0:
-                updated_count += 1
-                
-        except Exception as e:
-            if verbose:
-                print(f"레코드 저장 오류: {e}")
-    
-    return inserted_count, updated_count
-
-
-def save_single_record(collection, record: Dict[str, Any], 
-                      unique_fields: List[str]) -> str:
-    """
-    단일 레코드 저장
-    
-    Returns:
-        "inserted", "updated", "unchanged" 중 하나
+    컬렉션에서 가장 최근 레코드 1개를 조회
     """
     try:
-        query = {field: record[field] for field in unique_fields}
-        result = collection.replace_one(query, record, upsert=True)
-        
-        if result.upserted_id:
-            return "inserted"
-        elif result.modified_count > 0:
-            return "updated"
-        else:
-            return "unchanged"
+        latest = collection.find_one(sort=[(sort_field, DESCENDING)])
+        return latest
     except Exception as e:
-        print(f"레코드 저장 오류: {e}")
-        return "error"
-
-
-def get_latest_record(collection, sort_field: str = "date"):
-    """최신 레코드 조회"""
-    try:
-        result = collection.find().sort(sort_field, -1).limit(1)
-        records = list(result)
-        return records[0] if records else None
-    except Exception as e:
-        print(f"최신 레코드 조회 오류: {e}")
+        print(f"최근 레코드 조회 실패: {e}")
         return None
 
-
-def get_collection_stats(client, collection_name: str) -> Dict[str, Any]:
-    """컬렉션 통계 조회"""
-    collection = get_collection(client, collection_name)
-    
-    try:
-        count = collection.count_documents({})
-        latest = get_latest_record(collection)
+def save_records(collection, records, unique_fields, verbose=False):
+    """
+    데이터 대량 저장 (Bulk Write) - Upsert 방식
+    """
+    if not records:
+        return 0, 0
         
-        return {
-            "collection_name": collection_name,
-            "total_count": count,
-            "latest_date": latest.get("date") if latest else None,
-            "latest_value": latest.get("rate") or latest.get("close") or latest.get("value") if latest else None
-        }
-    except Exception as e:
-        print(f"통계 조회 오류: {e}")
-        return {
-            "collection_name": collection_name,
-            "total_count": 0,
-            "error": str(e)
-        }
+    operations = []
+    for record in records:
+        # 중복 체크를 위한 필터 생성
+        filter_doc = {field: record[field] for field in unique_fields}
+        
+        # UpdateOne(filter, update, upsert=True)
+        op = UpdateOne(
+            filter_doc,
+            {"$set": record},
+            upsert=True
+        )
+        operations.append(op)
+    
+    if operations:
+        try:
+            result = collection.bulk_write(operations)
+            if verbose:
+                print(f"저장 완료: 신규/수정 {result.upserted_count + result.modified_count}건")
+            return result.upserted_count, result.modified_count
+        except Exception as e:
+            print(f"Bulk Write 오류: {e}")
+            return 0, 0
+    return 0, 0

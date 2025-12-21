@@ -1,20 +1,9 @@
-# MongoDB
-pymongo==4.6.1
-
-# 데이터 처리
-pandas==2.1.4
-numpy==1.26.2
-
-# Yahoo Finance (주가, 원자재)
-yfinance==0.2.33
-
-# FRED API (미국 금리)
-fredapi==0.5.1
-
-# HTTP 요청 (한국은행 API)
-requests==2.31.0
-
-# 날짜 처리
-python-dateutil==2.8.2
-
+# Data/Data_collection/requirements.txt
+pymongo
+pandas
+python-dotenv
+requests
+yfinance
+fredapi
 finance-datareader
+lxml
