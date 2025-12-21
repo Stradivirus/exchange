@@ -1,72 +1,74 @@
 # daily_update/stock_cron.py
 """
-주가지수 일일 업데이트
-- 수정사항: 최근 5일 고정 -> DB 마지막 저장일 기준 자동 증분 업데이트
+주가지수 일일 업데이트 (FinanceDataReader 적용)
 """
 import sys
 sys.path.append('..')
 
-import yfinance as yf
+import FinanceDataReader as fdr
+import pandas as pd
 from datetime import datetime, timedelta
-# get_latest_record 추가 임포트
 from common import (
     get_mongo_client, get_collection, create_date_index,
-    STOCK_INDICES, safe_clean_value, print_summary,
-    get_latest_record 
+    STOCK_INDICES, safe_clean_value, print_summary, get_latest_record
 )
 
+# FDR용 심볼 매핑 (Yahoo -> FDR/Naver)
+FDR_TICKERS = {
+    "KOSPI": "KS11",
+    "KOSDAQ": "KQ11",
+    "DOW_JONES": "DJI",
+    "NASDAQ": "IXIC",
+    "SP500": "US500"
+}
 
 def main():
-    """메인 실행"""
-    print(f"=== 주가지수 일일 업데이트 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
-    
-    # 오늘 날짜 (검색 종료일은 내일로 설정해야 오늘 데이터까지 포함됨)
-    today = datetime.now()
-    next_day = today + timedelta(days=1)
-    end_date_str = next_day.strftime('%Y-%m-%d')
+    print(f"=== 주가지수 업데이트 (FDR) 시작 ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
     
     client = get_mongo_client()
     total_new = 0
+    today = datetime.now()
     
-    for name, ticker in STOCK_INDICES.items():
+    for name, _ in STOCK_INDICES.items(): # 기존 ticker 무시하고 FDR_TICKERS 사용
+        fdr_symbol = FDR_TICKERS.get(name)
+        if not fdr_symbol:
+            continue
+
         try:
             collection = get_collection(client, name)
             
-            # 1. DB에서 가장 최근 데이터 날짜 조회
-            latest_doc = get_latest_record(collection, sort_field="date")
+            # 1. DB에서 마지막 날짜 확인
+            latest_doc = get_latest_record(collection)
             
-            if latest_doc and 'date' in latest_doc:
-                # 마지막 저장일 다음날부터 조회
+            if latest_doc:
                 last_date = latest_doc['date']
-                if isinstance(last_date, str):
-                    last_date = datetime.strptime(last_date, "%Y-%m-%d")
-                
                 start_dt = last_date + timedelta(days=1)
-                start_date_str = start_dt.strftime('%Y-%m-%d')
                 
-                # 만약 시작일이 오늘보다 미래라면(이미 최신임) 스킵
+                # 이미 최신이면 스킵
                 if start_dt.date() > today.date():
-                    print(f"--- {name}: 이미 최신 데이터임 ({last_date.strftime('%Y-%m-%d')}) ---")
+                    print(f"--- {name}: 이미 최신 데이터 ({last_date.strftime('%Y-%m-%d')}) ---")
                     continue
+                
+                start_date_str = start_dt.strftime('%Y-%m-%d')
             else:
-                # 데이터가 아예 없으면 1년 전부터 조회 (초기화)
                 start_date_str = (today - timedelta(days=365)).strftime('%Y-%m-%d')
-                print(f"--- {name}: 초기 데이터(1년치) 수집 ---")
+                print(f"--- {name}: 초기 데이터 수집 ---")
 
-            print(f"\n--- {name} 데이터 확인 중 ({start_date_str} ~ {today.strftime('%Y-%m-%d')}) ---")
+            print(f"\n--- {name} ({fdr_symbol}) 조회: {start_date_str} ~ ---")
             
-            # 2. yfinance로 데이터 다운로드 (종료일은 end_date_str까지)
-            data = yf.download(ticker, start=start_date_str, end=end_date_str,
-                             auto_adjust=True, progress=False)
+            # 2. FDR로 데이터 수집 (start만 넣으면 오늘까지 다 가져옴)
+            df = fdr.DataReader(fdr_symbol, start=start_date_str)
             
-            if not data.empty:
-                df = data.reset_index()
+            if not df.empty:
+                df = df.reset_index() # Date 컬럼 생성
                 create_date_index(collection, [("date", 1)])
                 
                 inserted_count = 0
                 updated_count = 0
                 
                 for _, row in df.iterrows():
+                    # 컬럼명 소문자 통일 및 매핑
+                    # FDR 컬럼: Date, Open, High, Low, Close, Volume, Change 등
                     record = {
                         'date': safe_clean_value(row['Date']),
                         'open': safe_clean_value(row['Open']),
@@ -84,7 +86,6 @@ def main():
                         collection.insert_one(record)
                         inserted_count += 1
                     else:
-                        # 주요 값이 바뀐 경우에만 update
                         if any(record[k] != existing.get(k) for k in ['open', 'high', 'low', 'close', 'volume']):
                             collection.replace_one(query, record, upsert=True)
                             updated_count += 1
@@ -98,16 +99,13 @@ def main():
                 else:
                     print(f"{name}: 변경사항 없음")
             else:
-                print(f"{name}: 새로운 데이터 없음")
+                print(f"{name}: 새로운 데이터 없음 (휴장일 가능성)")
                 
         except Exception as e:
             print(f"{name} 오류: {e}")
-            import traceback
-            traceback.print_exc()
-    
+
     print(f"\n=== 업데이트 완료 - 총 신규: {total_new}개 ===")
     client.close()
-
 
 if __name__ == "__main__":
     main()

@@ -16,3 +16,5 @@ requests==2.31.0
 
 # 날짜 처리
 python-dateutil==2.8.2
+
+finance-datareader
